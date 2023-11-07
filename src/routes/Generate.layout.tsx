@@ -18,6 +18,9 @@ import {
 } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 
+/**
+ * Page de génération de parties
+ */
 export default function Generate() {
   const min = 2;
   const max = 8;
