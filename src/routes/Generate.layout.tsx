@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 /**
@@ -24,6 +25,40 @@ import { Link } from "react-router-dom";
 export default function Generate() {
   const min = 2;
   const max = 8;
+
+  const [formData, setFormData] = useState({
+    nbGame: 5,
+    nbPlayer: min,
+  });
+
+  function handleChange(
+    event:
+      | React.FormEvent<HTMLInputElement>
+      | React.FormEvent<HTMLButtonElement>
+  ) {
+    const { name, value } = event.target as HTMLInputElement;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function handleGenerate() {
+    try {
+      const res = await fetch("http://localhost:3002/game/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nbGame: formData.nbGame,
+          nbPlayer: formData.nbPlayer,
+        }),
+      });
+      // const data = await res.json();
+      // console.log(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <main className="flex w-full justify-center items-center">
       <Card className="w-[350px]">
@@ -34,22 +69,28 @@ export default function Generate() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleGenerate}>
             <div className="grid w-full gap-4">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="nbGame">Nombre de parties</Label>
                 <Input
                   id="nbGame"
+                  name="nbGame"
                   placeholder="5"
                   type="number"
                   defaultValue={5}
                   min={1}
+                  onChange={handleChange}
                 />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="nbPlayer">Nombre de joueurs</Label>
                 <Select defaultValue={min.toString()}>
-                  <SelectTrigger id="nbPlayer">
+                  <SelectTrigger
+                    id="nbPlayer"
+                    name="nbPlayer"
+                    onChange={handleChange}
+                  >
                     <SelectValue defaultValue={min} />
                   </SelectTrigger>
                   <SelectContent position="popper">
@@ -68,7 +109,7 @@ export default function Generate() {
           <Button variant="outline" asChild>
             <Link to="/">Retour</Link>
           </Button>
-          <Button>Générer</Button>
+          <Button onClick={handleGenerate}>Générer</Button>
         </CardFooter>
       </Card>
     </main>

@@ -1,11 +1,15 @@
 /* eslint-env node */
 import cors from "cors";
 import express, { json } from "express";
+import { router as gameRouter } from "./game.js";
 
 export const app = express();
 const PORT = 3002;
+
 app.use(cors());
 app.use(json());
+
+app.use("/game", gameRouter);
 
 app.listen(PORT, () => {
   console.log(`Le serveur tourne sur le port ${PORT}`);
