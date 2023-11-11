@@ -23,9 +23,10 @@ router.get("/getAll", (req, res) => {
 router.post("/generate", async ({ body }, res) => {
   const { nbGame, nbPlayer } = body;
   const newPlayerIds = [];
+  const participations = [];
 
   for (let i = 0; i < nbPlayer; i++) {
-    const result = await db.query(
+    const insertedPlayer = await db.query(
       "INSERT INTO Player (pseudo) VALUES (?)",
       [`Player ${i}`],
       (err) => {
@@ -34,26 +35,54 @@ router.post("/generate", async ({ body }, res) => {
         }
       }
     );
-    newPlayerIds.push(result[0].insertId);
+    newPlayerIds.push(insertedPlayer[0].insertId);
   }
 
   for (let i = 0; i < nbGame; i++) {
-    await db.query(
+    const insertedGame = await db.query(
       "INSERT INTO Game (idWinner, nbPlayer) VALUES (?, ?)",
       [randomInt(newPlayerIds[0], newPlayerIds.at(-1)), nbPlayer],
-      (err, result) => {
+      (err, insertedGame) => {
         if (err) {
           console.log(err);
         }
-        res.send(result);
+        res.send(insertedGame);
       }
     );
-  }
 
-  // query("INSERT INTO Game () VALUES (?)", [], (err, result) => {
-  //   if (err) {
-  //     console.log(err);
-  //   }
-  //   res.send(result);
-  // });
+    for (let newPlayer of newPlayerIds) {
+      const insertedParticipation = await db.query(
+        "INSERT INTO GameParticipation (idGame, idPlayer) VALUES (?, ?)",
+        [insertedGame[0].insertId, newPlayer],
+        (err) => {
+          if (err) {
+            console.log(err);
+          }
+        }
+      );
+      participations.push(insertedParticipation[0].insertId);
+    }
+
+    for (let i = 0; i < randomInt(0, 100); i++) {
+      const idParticipation = randomInt(
+        participations[0],
+        participations.at(-1)
+      );
+
+      const colors = ["red", "green", "blue", "yellow"];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const value = randomInt(1, 9);
+      const rowPosition = randomInt(1, 6);
+      const colPosition = randomInt(1, 6);
+      await db.query(
+        "INSERT INTO GameMove (idParticipation, color, value, rowPosition, colPosition) VALUES (?, ?, ?, ?, ?)",
+        [idParticipation, color, value, rowPosition, colPosition],
+        (err) => {
+          if (err) {
+            console.log(err);
+          }
+        }
+      );
+    }
+  }
 });
