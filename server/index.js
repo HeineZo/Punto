@@ -16,16 +16,6 @@ app.listen(PORT, () => {
 });
 
 
-// // Route to get all posts
-// app.get("/api/getAllGame", (req, res) => {
-//   query("SELECT * FROM Game", (err, result) => {
-//     if (err) {
-//       console.log(err);
-//     }
-//     res.send(result);
-//   });
-// });
-
 // // Route to get one post
 // app.get("/api/getFromId/:id", (req, res) => {
 //   const id = req.params.id;

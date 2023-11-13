@@ -7,14 +7,10 @@ export const router = express.Router();
 /**
  * Récupérer toutes les parties
  */
-router.get("/getAll", (req, res) => {
-  // query("SELECT * FROM Game", (err, result) => {
-  //   if (err) {
-  //     console.log(err);
-  //   }
-  //   res.send(result);
-  // });
-  res.json("Hello world");
+router.get("/findAll", async (req, res) => {
+  const [rows] = await db.query("SELECT * FROM Game");
+  console.log('hello');
+  res.send(rows ?? []);
 });
 
 /**
@@ -31,7 +27,7 @@ router.post("/generate", async ({ body }, res) => {
       [`Player ${i}`],
       (err) => {
         if (err) {
-          console.log(err);
+          return res.send(500, { message: `Une erreur est survenue` });
         }
       }
     );
@@ -42,11 +38,10 @@ router.post("/generate", async ({ body }, res) => {
     const insertedGame = await db.query(
       "INSERT INTO Game (idWinner, nbPlayer) VALUES (?, ?)",
       [randomInt(newPlayerIds[0], newPlayerIds.at(-1)), nbPlayer],
-      (err, insertedGame) => {
+      (err) => {
         if (err) {
-          console.log(err);
+          return res.send(500, { message: `Une erreur est survenue` });
         }
-        res.send(insertedGame);
       }
     );
 
@@ -56,7 +51,7 @@ router.post("/generate", async ({ body }, res) => {
         [insertedGame[0].insertId, newPlayer],
         (err) => {
           if (err) {
-            console.log(err);
+            return res.send(500, { message: `Une erreur est survenue` });
           }
         }
       );
@@ -79,10 +74,14 @@ router.post("/generate", async ({ body }, res) => {
         [idParticipation, color, value, rowPosition, colPosition],
         (err) => {
           if (err) {
-            console.log(err);
+            return res.send(500, { message: `Une erreur est survenue` });
           }
         }
       );
     }
   }
+
+  return res.send(200, {
+    message: `${nbGame} parties et ${nbPlayer} joueurs ont été créés`,
+  });
 });

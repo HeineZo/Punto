@@ -16,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { Check, Loader2 as Loader, XCircle } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -25,6 +27,8 @@ import { Link } from "react-router-dom";
 export default function Generate() {
   const min = 2;
   const max = 8;
+
+  const { toast } = useToast();
 
   const [formData, setFormData] = useState({
     nbGame: 5,
@@ -42,6 +46,11 @@ export default function Generate() {
 
   async function handleGenerate() {
     try {
+      toast({
+        title: "Génération en cours...",
+        description: `Création de ${formData.nbGame} parties avec ${formData.nbPlayer} joueurs`,
+        action: <Loader className="animate-spin" />,
+      });
       const res = await fetch("http://localhost:3002/game/generate", {
         method: "POST",
         headers: {
@@ -52,9 +61,22 @@ export default function Generate() {
           nbPlayer: formData.nbPlayer,
         }),
       });
-      // const data = await res.json();
-      // console.log(data);
+
+      const data = await res.json();
+      console.log(data)
+      toast({
+        title: "Succès",
+        description: data.message,
+        action: <Check className="text-green-600" />,
+      });
+      console.log(data);
     } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue",
+        action: <XCircle />,
+      });
       console.error(error);
     }
   }
