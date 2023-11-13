@@ -9,7 +9,11 @@ export const router = express.Router();
  */
 router.get("/findAll", async (req, res) => {
   const [rows] = await db.query("SELECT * FROM Game");
-  console.log('hello');
+
+  // const games = [];
+  // for (let row of rows) {
+  // }
+  // console.log(games);
   res.send(rows ?? []);
 });
 
