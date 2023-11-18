@@ -1,12 +1,12 @@
 import db from "../config/db.js";
-import { randomInt } from "crypto";
-import { error, router } from "../index.js";
-import { Player } from "./Player.class.js";
+import GameParticipation from "./GameParticipation.class.js";
+import Player from "./Player.class.js";
 
 /**
  * Classe représentant une partie
  */
 export default class Game {
+  public static tableName = "Game";
   /**
    * Identifiant de la partie
    */
@@ -15,7 +15,7 @@ export default class Game {
   /**
    * Gagnant de la partie
    */
-  public winner: Player;
+  public idWinner: number;
 
   /**
    * Nombre de cartes posées par tous les joueurs dans la partie
@@ -35,24 +35,42 @@ export default class Game {
   /**
    * Date à laquelle la partie a été jouée
    */
-  public createdAt: number;
+  public createdAt: Date;
 
   constructor(data: Game) {
-    const { id, duration, winner, nbMove, nbRound, createdAt } = data;
+    const { id, duration, idWinner, nbMove, nbRound, createdAt } = data;
     this.id = id;
-    this.winner = new Player(winner);
+    this.idWinner = idWinner;
     this.nbMove = nbMove;
     this.nbRound = nbRound;
     this.duration = duration;
-    this.createdAt = createdAt;
+    this.createdAt = new Date(createdAt);
   }
 
   /**
    * Map les données récupérées de la base de donnée et les transforme en objet
    * @param rows Données récupérées de la base de donnée
    */
-  public static rowToObject(rows) {
-    return rows.map((gameData) => new Game(gameData));
+  public static rowToObject(rows): Game[] {
+    return rows.map((row) => new Game(row));
+  }
+
+  /**
+   * Renvoi les données au client
+   * @returns Données de la classe avec des informations supplémentaires
+   */
+  public async toClient() {
+    const winner = await Player.find(this.idWinner);
+    const nbPlayer = await GameParticipation.getNbParticipation(this.id);
+    return {
+      id: this.id,
+      winner: winner ? winner.toClient() : null,
+      nbMove: this.nbMove,
+      nbRound: this.nbRound,
+      duration: this.duration,
+      nbPlayer,
+      createdAt: this.createdAt,
+    };
   }
 
   /**
@@ -60,11 +78,29 @@ export default class Game {
    */
   public static async findAll() {
     try {
-      const [rows] = await db.query("SELECT * FROM Game");
+      const [rows] = await db.query(`SELECT * FROM ${this.tableName}`);
       return this.rowToObject(rows);
     } catch (err) {
       console.error(err);
-      return false;
+      return [];
+    }
+  }
+
+  /**
+   * Cherche une partie à partir de son identifiant
+   * @param id Identifiant de la partie
+   * @returns Partie trouvée
+   */
+  public static async find(id: number): Promise<Game | null> {
+    try {
+      const [rows] = await db.query(
+        `SELECT * FROM ${this.tableName} WHERE id = ?`,
+        [id]
+      );
+      return this.rowToObject(rows)[0];
+    } catch (err) {
+      console.error(err);
+      return null;
     }
   }
 }

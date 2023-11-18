@@ -38,7 +38,7 @@ export default function CreateGame() {
   const disableDeletePlayers = players.length <= 2;
 
   function handleStart() {
-    console.log("hello");
+    console.log("starting");
   }
 
   /**

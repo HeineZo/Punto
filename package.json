@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "client": "vite",
-    "server": "npx tsx ./server/index.ts",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "npx tsx watch ./server/index.ts --clear-screen=false",
+    "dev": "concurrently \"npm run client\" \"npm run server\"",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
@@ -22,6 +22,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cors": "^2.8.5",
+    "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "framer-motion": "^10.16.4",

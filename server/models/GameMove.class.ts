@@ -1,10 +1,10 @@
-import { GameParticipation } from "./GameParticipation.class";
+import GameParticipation from "./GameParticipation.class";
 import { Colors, Range } from "./type";
 
 /**
  * Carte posée par un joueur dans une partie
  */
-export class GameMove {
+export default class GameMove {
   /**
    * Identifiant de la carte qui a été jouée
    */

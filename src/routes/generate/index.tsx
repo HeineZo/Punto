@@ -44,11 +44,13 @@ export default function Generate() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   }
 
+  console.log(formData);
+
   async function handleGenerate() {
     try {
       toast({
-        title: "Génération en cours...",
-        description: `Création de ${formData.nbGame} parties avec ${formData.nbPlayer} joueurs`,
+        title: "Génération des parties.",
+        description: `En fonction du nombre de parties et de joueurs spécifiés, cette opération peut prendre un certain temps.`,
         action: <Loader className="animate-spin" />,
       });
       const res = await fetch("http://localhost:3002/game/generate", {
@@ -105,12 +107,11 @@ export default function Generate() {
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="nbPlayer">Nombre de joueurs</Label>
-                <Select defaultValue={min.toString()}>
-                  <SelectTrigger
-                    id="nbPlayer"
-                    name="nbPlayer"
-                    onChange={handleChange}
-                  >
+                <Select
+                  defaultValue={min.toString()}
+                  onValueChange={(nbPlayer) => setFormData({...formData, nbPlayer: Number(nbPlayer) })}
+                >
+                  <SelectTrigger id="nbPlayer" name="nbPlayer">
                     <SelectValue defaultValue={min} />
                   </SelectTrigger>
                   <SelectContent position="popper">

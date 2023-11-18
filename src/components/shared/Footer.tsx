@@ -15,7 +15,7 @@ export default function Footer() {
           <li>
             <Button asChild variant="outline" size="icon">
               <a
-                href=" https://discordapp.com/users/enzolefrigo"
+                href=" https://discordapp.com/users/295133253096964097"
                 target="_blank"
               >
                 <MessagesSquare className="w-5 h-5" />

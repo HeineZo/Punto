@@ -10,9 +10,17 @@ export const router = express.Router();
  * Récupérer toutes les parties
  */
 router.get("/findAll", async (req, res) => {
-  const games = Game.findAll();
-  console.log('hello',games)
-  res.send(games);
+  const games = await Game.findAll();
+  res.send(await Promise.all(games.map((game) => game.toClient())));
+});
+
+router.get("/find", async (req, res) => {
+  const { id } = req.query;
+  const game = await Game.find(Number(id));
+  if (!game) {
+    return res.status(404).send({ message: "Partie non trouvée" });
+  }
+  return res.send(await game.toClient());
 });
 
 /**
@@ -33,8 +41,8 @@ router.post("/generate", async ({ body }, res) => {
 
   for (let i = 0; i < nbGame; i++) {
     const [insertedGame] = await db.query(
-      "INSERT INTO Game (idWinner, nbPlayer) VALUES (?, ?)",
-      [randomInt(newPlayerIds[0], newPlayerIds.at(-1) ?? -1), nbPlayer]
+      "INSERT INTO Game (idWinner, nbPlayer, nbmove, duration) VALUES (?, ?, ?, ?)",
+      [randomInt(newPlayerIds[0], newPlayerIds.at(-1) ?? -1), nbPlayer, randomInt(10, 50), randomInt(180, 600)]
     );
 
     for (const newPlayer of newPlayerIds) {
