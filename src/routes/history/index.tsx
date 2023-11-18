@@ -9,7 +9,6 @@ export default function History() {
     "http://localhost:3002/game/findAll"
   );
 
-  console.log(data);
   if (error) {
     <div className="container mx-auto py-10">
       <h1>Historique des parties</h1>
@@ -27,7 +26,7 @@ export default function History() {
   return (
     <div className="container mx-auto py-10">
       <h1>Historique des parties</h1>
-      <DataTable columns={columns} data={data as Game[]} />
+      {/* <DataTable columns={columns} data={data as Game[]} /> */}
     </div>
   );
 }

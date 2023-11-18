@@ -4,6 +4,7 @@ import express, { json } from "express";
 import { router as gameRouter } from "./game.js";
 
 export const app = express();
+export const router = express.Router();
 const PORT = 3002;
 
 app.use(cors());
@@ -14,6 +15,10 @@ app.use("/game", gameRouter);
 app.listen(PORT, () => {
   console.log(`Le serveur tourne sur le port ${PORT}`);
 });
+
+export function error(res, err) {
+  res.status(409).json(err)
+}
 
 
 // // Route to get one post

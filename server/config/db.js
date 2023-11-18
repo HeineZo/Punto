@@ -9,4 +9,9 @@ const db = await createConnection({
   database: process.env.DB_NAME,
 });
 
+db.on('error', (err) => {
+  console.error('MySQL error', err);
+  db.end();
+});
+
 export default db;

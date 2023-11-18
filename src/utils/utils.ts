@@ -1,5 +1,5 @@
-import plural from "pluralize-fr";
+// import plural from "pluralize-fr";
 
-function pluralize(count, word) {
-    return plural(word, count);
-}
+// function pluralize(count, word) {
+//     return plural(word, count);
+// }

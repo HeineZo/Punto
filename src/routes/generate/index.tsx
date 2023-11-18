@@ -63,13 +63,11 @@ export default function Generate() {
       });
 
       const data = await res.json();
-      console.log(data)
       toast({
         title: "Succès",
         description: data.message,
         action: <Check className="text-green-600" />,
       });
-      console.log(data);
     } catch (error) {
       toast({
         variant: "destructive",
