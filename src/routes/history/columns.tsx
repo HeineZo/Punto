@@ -1,4 +1,5 @@
 import { Game } from "@/types/Game.class";
+import { Player } from "@/types/Player.class";
 import { ColumnDef } from "@tanstack/react-table";
 import { intervalToDuration, formatDuration, format } from "date-fns";
 
@@ -8,8 +9,18 @@ export const columns: ColumnDef<Game>[] = [
     header: "Identifiant de la partie",
   },
   {
-    accessorKey: "winner.pseudo",
+    accessorKey: "winner",
     header: "Gagnant",
+    cell: ({ row }) => {
+      const winner = new Player(row.getValue("winner"));
+
+      if (!winner.id) {
+        return (
+          <p className="font-bold text-red-500 animate-pulse">• En cours</p>
+        );
+      }
+      return winner.pseudo;
+    },
   },
   {
     accessorKey: "nbPlayer",

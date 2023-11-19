@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,30 +16,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trash, Plus } from "lucide-react";
+import { Game } from "@/types/Game.class";
+import { Player } from "@/types/Player.class";
+import { Plus, Trash } from "lucide-react";
 import { useState } from "react";
+import { useAtom } from "jotai";
 
 import { MagicMotion } from "react-magic-motion";
 import { Link } from "react-router-dom";
+import { gameInProgress } from "@/utils/store";
 
 export default function CreateGame() {
-  const [players, setPlayers] = useState<string[]>(["", ""]);
-
-  const min = 2;
-  const max = 5;
+  const [game, setGame] = useAtom(gameInProgress);
+  const [players, setPlayers] = useState<string[]>(
+    new Array(Game.minNbPlayer).fill("")
+  );
+  const [nbRound, setNbRound] = useState<number>(Game.minNbRound);
 
   // Désactive le bouton de démarrage si il n'y a pas au moins 2 joueurs
   const disableStartButton =
     players.filter(
       (element) => typeof element === "string" && element.trim() !== ""
-    ).length < 2;
+    ).length < Game.minNbPlayer;
 
-  // Désactive le bouton de suppression de joueurs si il n'y a pas au moins 2 joueurs
-  const disableDeletePlayers = players.length <= 2;
-
-  function handleStart() {
-    console.log("starting");
-  }
+  // Désactive le bouton de suppression de joueurs si il n'y a pas au moins le nombre minimum de joueurs
+  const disableDeletePlayers = players.length <= Game.minNbPlayer;
 
   /**
    * Lorsqu'un joueur change de nom, met à jour la liste des joueurs
@@ -71,6 +72,18 @@ export default function CreateGame() {
     data.splice(index, 1);
     setPlayers(data);
   }
+
+  /**
+   * Démarre la partie
+   */
+  async function handleStart() {
+    const newGame = new Game({ nbPlayer: players.length, nbRound });
+    for (const player of players) {
+      newGame.addPlayer(new Player({ pseudo: player }));
+    }
+    setGame(await newGame.save());
+  }
+
   return (
     <Card className="min-w-[350px]">
       <CardHeader>
@@ -107,20 +120,25 @@ export default function CreateGame() {
         </MagicMotion>
         <div className="flex flex-col gap-2">
           <Label htmlFor="nbPlayer">Nombre de manches pour gagner</Label>
-          <Select defaultValue={min.toString()}>
-            <SelectTrigger
-              id="nbRound"
-              name="nbRound"
-              //   onChange={handleChange}
-            >
-              <SelectValue defaultValue={min} />
+          <Select
+            defaultValue={nbRound.toString()}
+            onValueChange={(nbRound) => setNbRound(Number(nbRound))}
+          >
+            <SelectTrigger id="nbRound" name="nbRound">
+              <SelectValue defaultValue={nbRound} />
             </SelectTrigger>
             <SelectContent position="popper">
-              {Array.from({ length: max - min + 1 }, (_, i) => (
-                <SelectItem key={i + min} value={`${i + min}`}>
-                  {i + min}
-                </SelectItem>
-              ))}
+              {Array.from(
+                { length: Game.maxNbRound - Game.minNbRound + 1 },
+                (_, i) => (
+                  <SelectItem
+                    key={i + Game.minNbRound}
+                    value={`${i + Game.minNbRound}`}
+                  >
+                    {i + Game.minNbRound}
+                  </SelectItem>
+                )
+              )}
             </SelectContent>
           </Select>
         </div>

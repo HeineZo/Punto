@@ -1,3 +1,4 @@
+import { ResultSetHeader } from "mysql2";
 import db from "../config/db.js";
 import GameParticipation from "./GameParticipation.class.js";
 import Player from "./Player.class.js";
@@ -20,7 +21,7 @@ export default class Game {
   /**
    * Nombre de cartes posées par tous les joueurs dans la partie
    */
-  public nbMove: number;
+  public nbMove: number = 0;
 
   /**
    * Nombre de manches pour gagner la partie
@@ -30,21 +31,15 @@ export default class Game {
   /**
    * Temps qu'a duré la partie
    */
-  public duration: number;
+  public duration: number = 0;
 
   /**
    * Date à laquelle la partie a été jouée
    */
-  public createdAt: Date;
+  public createdAt: Date = new Date();
 
-  constructor(data: Game) {
-    const { id, duration, idWinner, nbMove, nbRound, createdAt } = data;
-    this.id = id;
-    this.idWinner = idWinner;
-    this.nbMove = nbMove;
-    this.nbRound = nbRound;
-    this.duration = duration;
-    this.createdAt = new Date(createdAt);
+  constructor(init?: Partial<Game>) {
+    Object.assign(this, init);
   }
 
   /**
@@ -62,6 +57,7 @@ export default class Game {
   public async toClient() {
     const winner = await Player.find(this.idWinner);
     const nbPlayer = await GameParticipation.getNbParticipation(this.id);
+    const players = await GameParticipation.getPlayers(this.id);
     return {
       id: this.id,
       winner: winner ? winner.toClient() : null,
@@ -69,8 +65,26 @@ export default class Game {
       nbRound: this.nbRound,
       duration: this.duration,
       nbPlayer,
+      players,
       createdAt: this.createdAt,
     };
+  }
+
+  /**
+   * Sauvegarde la partie dans la base de donnée
+   */
+  public async save() {
+    try {
+      const [result] = await db.query(
+        `INSERT INTO ${Game.tableName} SET ?`,
+        this
+      );
+      this.id = (result as ResultSetHeader).insertId;
+      return this;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
   }
 
   /**

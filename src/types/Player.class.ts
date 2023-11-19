@@ -5,46 +5,39 @@ export class Player {
   /**
    * Identifiant du joueur
    */
-  public id: number;
+  public id?: number;
 
   /**
    * Pseudo du joueur
    */
-  public pseudo: string;
+  public pseudo?: string;
 
   /**
    * Mot de passe du joueur
    */
-  public password: string;
+  public password?: string;
 
   /**
    * Nombre de cartes posées par le joueur toute partie confondue
    */
-  public nbMove: number;
+  public nbMove: number = 0;
 
   /**
    * Nombre de victoires du joueur
    */
-  public nbVictory: number;
+  public nbVictory: number = 0;
 
   /**
    * Nombre de défaites du joueur
    */
-  public nbDefeat: number;
+  public nbDefeat: number = 0;
 
   /**
    * Date à laquelle la partie a été jouée
    */
-  public createdAt: number;
+  public createdAt: Date = new Date();
 
-  constructor(data: Player) {
-    const { id, pseudo, password, nbMove, nbVictory, nbDefeat, createdAt } = data;
-    this.id = id;
-    this.pseudo = pseudo;
-    this.nbMove = nbMove;
-    this.password = password;
-    this.nbVictory = nbVictory;
-    this.nbDefeat = nbDefeat;
-    this.createdAt = createdAt;
+  constructor(init: Partial<Player>) {
+    Object.assign(this, init);
   }
 }

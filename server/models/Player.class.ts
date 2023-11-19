@@ -1,3 +1,4 @@
+import { ResultSetHeader } from "mysql2";
 import db from "../config/db";
 
 /**
@@ -40,16 +41,8 @@ export default class Player {
    */
   public createdAt: number;
 
-  constructor(data: Player) {
-    const { id, pseudo, password, nbMove, nbVictory, nbDefeat, createdAt } =
-      data;
-    this.id = id;
-    this.pseudo = pseudo;
-    this.nbMove = nbMove;
-    this.password = password;
-    this.nbVictory = nbVictory;
-    this.nbDefeat = nbDefeat;
-    this.createdAt = createdAt;
+  constructor(init: Partial<Player>) {
+    Object.assign(this, init);
   }
 
   /**
@@ -57,7 +50,7 @@ export default class Player {
    * @param rows Données récupérées de la base de donnée
    */
   public static rowToObject(rows) {
-      return rows.map((row) => new Player(row));
+    return rows.map((row) => new Player(row));
   }
 
   /**
@@ -73,6 +66,21 @@ export default class Player {
       nbDefeat: this.nbDefeat,
       createdAt: this.createdAt,
     };
+  }
+
+  /**
+   * Sauvegarde le joueur dans la base de donnée
+   */
+  public async save() {
+    try {
+      const [insertedPlayer] = await db.query(
+        `INSERT INTO ${Player.tableName} (pseudo, password) VALUES (?, ?)`,
+        [this.pseudo, this.password]
+      );
+      this.id = (insertedPlayer as ResultSetHeader).insertId;
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   /**

@@ -3,6 +3,8 @@ import { randomInt } from "crypto";
 import express from "express";
 import Game from "./models/Game.class.ts";
 import { ResultSetHeader } from "mysql2";
+import Player from "./models/Player.class.ts";
+import GameParticipation from "./models/GameParticipation.class.ts";
 
 export const router = express.Router();
 
@@ -14,12 +16,32 @@ router.get("/findAll", async (req, res) => {
   res.send(await Promise.all(games.map((game) => game.toClient())));
 });
 
-router.get("/find", async (req, res) => {
-  const { id } = req.query;
+router.get("/find/:id", async (req, res) => {
+  const { id } = req.params;
   const game = await Game.find(Number(id));
   if (!game) {
     return res.status(404).send({ message: "Partie non trouvée" });
   }
+  return res.send(await game.toClient());
+});
+
+router.post("/new", async ({ body }, res) => {
+  const { players, nbRound, createdAt } = body;
+  const game = new Game({ nbRound, createdAt });
+  await game.save();
+
+  // Sauvegarde des joueurs et de leur participation
+  for (const player of players) {
+    const newPlayer = new Player(player);
+    await newPlayer.save();
+
+    const participation = new GameParticipation({
+      idGame: game.id,
+      idPlayer: newPlayer.id,
+    });
+    await participation.save();
+  }
+
   return res.send(await game.toClient());
 });
 
@@ -42,7 +64,12 @@ router.post("/generate", async ({ body }, res) => {
   for (let i = 0; i < nbGame; i++) {
     const [insertedGame] = await db.query(
       "INSERT INTO Game (idWinner, nbPlayer, nbmove, duration) VALUES (?, ?, ?, ?)",
-      [randomInt(newPlayerIds[0], newPlayerIds.at(-1) ?? -1), nbPlayer, randomInt(10, 50), randomInt(180, 600)]
+      [
+        randomInt(newPlayerIds[0], newPlayerIds.at(-1) ?? -1),
+        nbPlayer,
+        randomInt(10, 50),
+        randomInt(180, 600),
+      ]
     );
 
     for (const newPlayer of newPlayerIds) {
