@@ -2,6 +2,7 @@ import { ResultSetHeader } from "mysql2";
 import db from "../config/db.js";
 import GameParticipation from "./GameParticipation.class.js";
 import Player from "./Player.class.js";
+import { getTimestamp } from "../../src/utils/utils.js";
 
 /**
  * Classe représentant une partie
@@ -17,6 +18,11 @@ export default class Game {
    * Gagnant de la partie
    */
   public idWinner: number;
+
+  /**
+   * Nombre de joueurs dans la partie
+   */
+  public nbPlayer: number;
 
   /**
    * Nombre de cartes posées par tous les joueurs dans la partie
@@ -36,7 +42,7 @@ export default class Game {
   /**
    * Date à laquelle la partie a été jouée
    */
-  public createdAt: Date = new Date();
+  public createdAt: number = getTimestamp();
 
   constructor(init?: Partial<Game>) {
     Object.assign(this, init);
@@ -80,10 +86,10 @@ export default class Game {
         this
       );
       this.id = (result as ResultSetHeader).insertId;
-      return this;
+      return true;
     } catch (err) {
       console.error(err);
-      return null;
+      return false;
     }
   }
 

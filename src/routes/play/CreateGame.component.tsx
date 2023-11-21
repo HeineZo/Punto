@@ -18,16 +18,18 @@ import {
 } from "@/components/ui/select";
 import { Game } from "@/types/Game.class";
 import { Player } from "@/types/Player.class";
-import { Plus, Trash } from "lucide-react";
+import { Plus, Trash, XCircle } from "lucide-react";
 import { useState } from "react";
 import { useAtom } from "jotai";
 
 import { MagicMotion } from "react-magic-motion";
 import { Link } from "react-router-dom";
 import { gameInProgress } from "@/utils/store";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function CreateGame() {
   const [game, setGame] = useAtom(gameInProgress);
+  const { toast } = useToast();
   const [players, setPlayers] = useState<string[]>(
     new Array(Game.minNbPlayer).fill("")
   );
@@ -81,7 +83,17 @@ export default function CreateGame() {
     for (const player of players) {
       newGame.addPlayer(new Player({ pseudo: player }));
     }
-    setGame(await newGame.save());
+    const success = await newGame.save();
+    if (!success) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de créer la partie",
+        action: <XCircle />,
+      });
+    }
+    newGame.start();
+    setGame(newGame);
   }
 
   return (

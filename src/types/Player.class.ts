@@ -1,3 +1,5 @@
+import { getTimestamp } from "@/utils/utils";
+
 /**
  * Classe représentant un joueur
  */
@@ -35,7 +37,7 @@ export class Player {
   /**
    * Date à laquelle la partie a été jouée
    */
-  public createdAt: Date = new Date();
+  public createdAt?: number = getTimestamp();
 
   constructor(init: Partial<Player>) {
     Object.assign(this, init);

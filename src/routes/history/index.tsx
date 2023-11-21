@@ -11,21 +11,21 @@ export default function History() {
   );
 
   if (error) {
-    <div className="container mx-auto space-y-10 py-10">
+    <div className="container space-y-10 py-10">
       <Header title="Historique des parties" />
       <p>Aucune partie n'a encore été jouée</p>
     </div>;
   }
 
   if (!data) {
-    <div className="container mx-auto space-y-10 py-10">
+    <div className="container space-y-10 py-10">
       <Header title="Historique des parties" />
       <Loader className="animate-spin" />
     </div>;
   }
 
   return (
-    <div className="container mx-auto space-y-10 py-10">
+    <div className="container space-y-10 py-10">
       <Header title="Historique des parties" />
       <DataTable
         columns={columns}

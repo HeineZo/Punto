@@ -1,7 +1,7 @@
 import { Game } from "@/types/Game.class";
 import { Player } from "@/types/Player.class";
 import { ColumnDef } from "@tanstack/react-table";
-import { intervalToDuration, formatDuration, format } from "date-fns";
+import { intervalToDuration, formatDuration, format, fromUnixTime } from "date-fns";
 
 export const columns: ColumnDef<Game>[] = [
   {
@@ -56,8 +56,8 @@ export const columns: ColumnDef<Game>[] = [
     accessorKey: "createdAt",
     header: "Date",
     cell: ({ row }) => {
-      // On formatte la date
-      const date = new Date(row.getValue("createdAt"));
+      // On convertit le timestamp en date
+      const date = fromUnixTime(row.getValue("createdAt"));
       return format(date, "dd/MM/yyyy");
     },
   },

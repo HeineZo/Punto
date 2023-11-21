@@ -4,9 +4,9 @@ import { Player } from "./Player.class";
 import { Colors, Range } from "./type";
 
 /**
- * Carte posée par un joueur dans une partie
+ * Carte du jeu
  */
-export class GameMove {
+export class Card {
   /**
    * Identifiant de la carte qui a été jouée
    */

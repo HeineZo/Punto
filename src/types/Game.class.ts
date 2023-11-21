@@ -1,3 +1,5 @@
+import { getTimestamp } from "@/utils/utils";
+import { GameMove } from "./GameMove.class";
 import { Player } from "./Player.class";
 
 /**
@@ -50,6 +52,11 @@ export class Game {
   public players: Player[] = [];
 
   /**
+   * Cartes posées par les joueurs dans la partie
+   */
+  public moves: GameMove[] = [];
+
+  /**
    * Nombre de joueurs dans la partie
    */
   public nbPlayer?: number;
@@ -62,7 +69,7 @@ export class Game {
   /**
    * Date à laquelle la partie a été jouée
    */
-  public createdAt: Date = new Date();
+  public createdAt?: number = getTimestamp();
 
   /**
    * Construis une nouvelle partie
@@ -74,8 +81,9 @@ export class Game {
 
   /**
    * Sauvegarde la partie dans la base de donnée
+   * @returns True si la partie a été sauvegardée, false sinon
    */
-  public async save() {
+  public async save(): Promise<boolean> {
     try {
       const res = await fetch("http://localhost:3002/game/new", {
         method: "POST",
@@ -85,15 +93,11 @@ export class Game {
         body: JSON.stringify(this),
       });
 
-      return await res.json();
+      Object.assign(this, await res.json());
+      return true;
     } catch (error) {
-      // toast({
-      //   variant: "destructive",
-      //   title: "Erreur",
-      //   description: "Une erreur est survenue",
-      //   action: <XCircle />,
-      // });
       console.error(error);
+      return false;
     }
   }
 
@@ -107,30 +111,40 @@ export class Game {
   }
 
   /**
-   * Créer une partie
+   * Démarre la partie
    */
-  // public async create(data) {
-  //   try {
-  //     const res = await fetch("http://localhost:3002/game/new", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         nbGame: formData.nbGame,
-  //         nbPlayer: formData.nbPlayer,
-  //       }),
-  //     });
+  public start() {
+    this.moves.push(
+      new GameMove({ game: this, player: this.chooseRandomPlayer() })
+    );
+  }
 
-  //     const data = await res.json();
-  //   } catch (error) {
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Erreur",
-  //       description: "Une erreur est survenue",
-  //       action: <XCircle />,
-  //     });
-  //     console.error(error);
-  //   }
-  // }
+  /**
+   * Choisi un joueur aléatoire dans la partie
+   * @returns Un joueur aléatoire parmi les joueurs de la partie
+   */
+  public chooseRandomPlayer() {
+    const randomIndex = Math.floor(Math.random() * this.players.length);
+    return this.players[randomIndex];
+  }
+
+  /**
+   * Génère des parties aléatoires
+   * @param nbGame Nombre de parties à générer
+   * @param nbPlayer Nombre de joueurs dans chaque partie
+   * @returns Réponse de l'API
+   */
+  public static async generate(nbGame: number, nbPlayer: number): Promise<[boolean, {message: string}]> {
+    const res = await fetch("http://localhost:3002/game/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nbGame,
+        nbPlayer,
+      }),
+    });
+    return [res.ok, await res.json()];
+  }
 }

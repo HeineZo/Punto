@@ -37,37 +37,26 @@ export default function Generate() {
    * Génère des parties
    */
   async function handleGenerate() {
-    try {
-      toast({
-        title: "Génération des parties.",
-        description: `Cette opération peut prendre un certain temps`,
-        action: <Loader className="animate-spin" />,
-      });
-      const res = await fetch("http://localhost:3002/game/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nbGame: formData.nbGame,
-          nbPlayer: formData.nbPlayer,
-        }),
-      });
+    toast({
+      title: "Génération des parties.",
+      description: `Cette opération peut prendre un certain temps`,
+      action: <Loader className="animate-spin" />,
+    });
+    const [success, data] = await Game.generate(formData.nbGame, formData.nbPlayer);
 
-      const data = await res.json();
+    if (success) {
       toast({
         title: "Succès",
         description: data.message,
         action: <Check className="text-green-600" />,
       });
-    } catch (error) {
+    } else {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue",
+        description: data.message,
         action: <XCircle />,
       });
-      console.error(error);
     }
   }
 
@@ -92,24 +81,37 @@ export default function Generate() {
                   type="number"
                   defaultValue={5}
                   min={1}
-                  onChange={(event) => setFormData({...formData, nbGame: Number(event.target.value)})}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      nbGame: Number(event.target.value),
+                    })
+                  }
                 />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="nbPlayer">Nombre de joueurs</Label>
                 <Select
                   defaultValue={formData.nbPlayer.toString()}
-                  onValueChange={(nbPlayer) => setFormData({...formData, nbPlayer: Number(nbPlayer) })}
+                  onValueChange={(nbPlayer) =>
+                    setFormData({ ...formData, nbPlayer: Number(nbPlayer) })
+                  }
                 >
                   <SelectTrigger id="nbPlayer" name="nbPlayer">
                     <SelectValue defaultValue={formData.nbPlayer.toString()} />
                   </SelectTrigger>
                   <SelectContent position="popper">
-                    {Array.from({ length: Game.maxNbPlayer - Game.minNbPlayer + 1 }, (_, i) => (
-                      <SelectItem key={i + Game.minNbPlayer} value={`${i + Game.minNbPlayer}`}>
-                        {i + Game.minNbPlayer}
-                      </SelectItem>
-                    ))}
+                    {Array.from(
+                      { length: Game.maxNbPlayer - Game.minNbPlayer + 1 },
+                      (_, i) => (
+                        <SelectItem
+                          key={i + Game.minNbPlayer}
+                          value={`${i + Game.minNbPlayer}`}
+                        >
+                          {i + Game.minNbPlayer}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>

@@ -1,19 +1,22 @@
-import GameParticipation from "./GameParticipation.class";
+import { ResultSetHeader } from "mysql2";
+import { getTimestamp } from "../../src/utils/utils";
+import db from "../config/db";
 import { Colors, Range } from "./type";
 
 /**
  * Carte posée par un joueur dans une partie
  */
 export default class GameMove {
+  public static tableName = "GameMove";
   /**
    * Identifiant de la carte qui a été jouée
    */
   public id: number;
 
   /**
-   * Participation du joueur qui a joué la carte dans une partie
+   * Identifiant de la participation du joueur qui a joué la carte dans une partie
    */
-  public participation: GameParticipation;
+  public idParticipation: number;
 
   /**
    * Couleur de la carte
@@ -38,24 +41,26 @@ export default class GameMove {
   /**
    * Date à laquelle la carte a été jouée
    */
-  public createdAt: number;
+  public createdAt: number = getTimestamp();
 
-  constructor(data: GameMove) {
-    const {
-      id,
-      participation,
-      color,
-      value,
-      rowPosition,
-      colPosition,
-      createdAt,
-    } = data;
-    this.id = id;
-    this.participation = new GameParticipation(participation);
-    this.color = color;
-    this.value = value;
-    this.rowPosition = rowPosition;
-    this.colPosition = colPosition;
-    this.createdAt = createdAt;
+  constructor(init: Partial<GameMove>) {
+    Object.assign(this, init);
+  }
+
+  /**
+   * Sauvegarde le coup joué dans la base de donnée
+   */
+  public async save() {
+    try {
+      const [result] = await db.query(
+        `INSERT INTO ${GameMove.tableName} SET ?`,
+        this
+      );
+      this.id = (result as ResultSetHeader).insertId;
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
   }
 }

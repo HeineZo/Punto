@@ -2,6 +2,7 @@ import { ResultSetHeader } from "mysql2";
 import db from "../config/db";
 import Game from "./Game.class";
 import Player from "./Player.class";
+import { getTimestamp } from "../../src/utils/utils";
 
 /**
  * Classe représentant une participation d'un joueur dans une partie
@@ -31,7 +32,7 @@ export default class GameParticipation {
   /**
    * Date à laquelle le joueur a participé à la partie
    */
-  public createdAt: Date = new Date();
+  public createdAt: number = getTimestamp();
 
   constructor(init: Partial<GameParticipation>) {
     Object.assign(this, init);
@@ -62,19 +63,21 @@ export default class GameParticipation {
   }
 
   /**
-  * Sauvegarde la participation d'un joueur à une partie dans la base de donnée
-  */
- public async save() {
-   try {
-     const [result] = await db.query(
-       `INSERT INTO ${GameParticipation.tableName} (idGame, idPlayer) VALUES (?, ?)`,
-       [this.idGame, this.idPlayer]
-     );
-     this.id = (result as ResultSetHeader).insertId;
-   } catch (err) {
-     console.error(err);
-   }
- }
+   * Sauvegarde la participation d'un joueur à une partie dans la base de donnée
+   */
+  public async save() {
+    try {
+      const [result] = await db.query(
+        `INSERT INTO ${GameParticipation.tableName} SET ?`,
+        this
+      );
+      this.id = (result as ResultSetHeader).insertId;
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
     
 
   /**

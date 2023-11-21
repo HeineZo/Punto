@@ -1,5 +1,6 @@
 import { ResultSetHeader } from "mysql2";
 import db from "../config/db";
+import { getTimestamp } from "../../src/utils/utils";
 
 /**
  * Classe représentant un joueur
@@ -39,7 +40,7 @@ export default class Player {
   /**
    * Date à laquelle la partie a été jouée
    */
-  public createdAt: number;
+  public createdAt: number = getTimestamp();
 
   constructor(init: Partial<Player>) {
     Object.assign(this, init);
@@ -73,13 +74,15 @@ export default class Player {
    */
   public async save() {
     try {
-      const [insertedPlayer] = await db.query(
-        `INSERT INTO ${Player.tableName} (pseudo, password) VALUES (?, ?)`,
-        [this.pseudo, this.password]
+      const [result] = await db.query(
+        `INSERT INTO ${Player.tableName} SET ?`,
+        this
       );
-      this.id = (insertedPlayer as ResultSetHeader).insertId;
+      this.id = (result as ResultSetHeader).insertId;
+      return true;
     } catch (err) {
       console.error(err);
+      return false;
     }
   }
 
