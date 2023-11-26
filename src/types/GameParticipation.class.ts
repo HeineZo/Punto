@@ -1,7 +1,6 @@
 import { getTimestamp } from "@/utils/utils";
-import { Game } from "./Game.class";
+import { Card } from "./Card.class";
 import { Player } from "./Player.class";
-import { Colors } from "./type";
 
 /**
  * Classe représentant une participation d'un joueur dans une partie
@@ -15,7 +14,7 @@ export class GameParticipation {
   /**
    * Partie à laquelle le joueur participe
    */
-  public game?: Game;
+  // public game?: Game;
 
   /**
    * Joueur qui participe à la partie
@@ -28,18 +27,31 @@ export class GameParticipation {
   public nbMove: number = 0;
 
   /**
-   * Couleurs des cartes posées par le joueur dans la partie
+   * Paquet de carte du joueur
    */
-  public colors?: Colors[];
-
-  public cards?: 
+  public cards: Card[] = [];
 
   /**
    * Date à laquelle le joueur a participé à la partie
    */
-  public createdAt?: number = getTimestamp();
+  public createdAt: number = getTimestamp();
 
   constructor(init: Partial<GameParticipation>) {
     Object.assign(this, init);
+  }
+
+  /**
+   * Cherche les couleurs du joueur à partir de son paquet de carte
+   * @returns Les couleurs des cartes du joueur
+   */
+  public getColors() {
+    return Array.from(new Set(this.cards.map((card) => card.color)));
+  }
+
+  /**
+   * Mélange les cartes du joueur
+   */
+  public shuffle() {
+    this.cards.sort(() => Math.random() - 0.5);
   }
 }

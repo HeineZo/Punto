@@ -30,6 +30,7 @@ import { useToast } from "@/components/ui/use-toast";
 export default function CreateGame() {
   const [game, setGame] = useAtom(gameInProgress);
   const { toast } = useToast();
+
   const [players, setPlayers] = useState<string[]>(
     new Array(Game.minNbPlayer).fill("")
   );
@@ -43,6 +44,8 @@ export default function CreateGame() {
 
   // Désactive le bouton de suppression de joueurs si il n'y a pas au moins le nombre minimum de joueurs
   const disableDeletePlayers = players.length <= Game.minNbPlayer;
+  // Désactive le bouton d'ajout de joueurs si il y a déjà le nombre maximum de joueurs
+  const disableAddPlayers = players.length >= Game.maxNbPlayer;
 
   /**
    * Lorsqu'un joueur change de nom, met à jour la liste des joueurs
@@ -124,7 +127,12 @@ export default function CreateGame() {
                 </Button>
               </div>
             ))}
-            <Button variant="secondary" className="w-fit" onClick={addPlayer}>
+            <Button
+              variant="secondary"
+              className="w-fit"
+              onClick={addPlayer}
+              disabled={disableAddPlayers}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Ajouter un joueur
             </Button>

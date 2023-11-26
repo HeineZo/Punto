@@ -1,12 +1,11 @@
 import { getTimestamp } from "@/utils/utils";
-import { Game } from "./Game.class";
-import { Player } from "./Player.class";
-import { Colors, Range } from "./type";
+import { Card } from "./Card.class";
+import { GameParticipation } from "./GameParticipation.class";
 
 /**
  * Carte posée par un joueur dans une partie
  */
-export class GameMove {
+export class GameMove extends Card {
   /**
    * Identifiant de la carte qui a été jouée
    */
@@ -15,37 +14,7 @@ export class GameMove {
   /**
    * Joueur qui a joué la carte
    */
-  public player?: Player;
-
-  /**
-   * Partie dans laquelle la carte a été jouée
-   */
-  public game?: Game;
-
-  /**
-   * Participation du joueur qui a joué la carte dans une partie
-   */
-  // public participation: GameParticipation;
-
-  /**
-   * Couleur de la carte
-   */
-  public color?: Colors;
-
-  /**
-   * Valeur de la carte
-   */
-  public value?: Range<1, 9>;
-
-  /**
-   * Position horizontale de la carte sur le plateau
-   */
-  public rowPosition?: Range<1, 6>;
-
-  /**
-   * Position verticale de la carte sur le plateau
-   */
-  public colPosition?: Range<1, 6>;
+  public participation?: GameParticipation;
 
   /**
    * Date à laquelle la carte a été jouée
@@ -53,6 +22,7 @@ export class GameMove {
   public createdAt?: number = getTimestamp();
 
   constructor(init: Partial<GameMove>) {
+    super(init);
     Object.assign(this, init);
   }
 }

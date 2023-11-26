@@ -1,0 +1,104 @@
+import { enumToArray } from "@/utils/utils";
+import { Card } from "./Card.class";
+import { GameMove } from "./GameMove.class";
+import { GameParticipation } from "./GameParticipation.class";
+import { Player } from "./Player.class";
+import { Colors, Range } from "./type";
+
+/**
+ * Classe représentant une manche dans une partie
+ */
+export class GameRound {
+  /**
+   * Identifiant de la manche
+   */
+  public id?: number;
+
+  /**
+   * Gagnant de la manche
+   */
+  public winner?: Player;
+
+  /**
+   * Nombre de cartes posées par tous les joueurs dans la manche
+   */
+  public nbMove: number = 0;
+
+  /**
+   * Joueurs qui participent à la manche
+   */
+  public players: GameParticipation[] = [];
+
+  /**
+   * Cartes posées par les joueurs durant la manche
+   */
+  public moves: GameMove[] = [];
+
+  /**
+   * Temps qu'a duré le tour
+   */
+  public duration: number = 0;
+
+  /**
+   * Construis une nouvelle manche
+   * @param init Données de la nouvelle manche
+   */
+  public constructor(init?: Partial<GameRound>) {
+    Object.assign(this, init);
+    this.distributeCards();
+    this.moves.push(
+      new GameMove({ participation: this.chooseRandomPlayer() })
+    );
+  }
+
+  /**
+   * Choisi un joueur aléatoire dans la partie
+   * @returns Un joueur aléatoire parmi les joueurs de la partie
+   */
+  public chooseRandomPlayer() {
+    const randomIndex = Math.floor(Math.random() * this.players.length);
+    return this.players[randomIndex];
+  }
+
+  /**
+   * Distribue les cartes aux joueurs
+   */
+  public distributeCards() {
+    const colors = enumToArray(Colors);
+
+    for (const player of this.players) {
+      if (this.players.length > 2) {
+        player.cards.push(...this.generatePack(colors));
+      } else {
+        for (let i = 0; i < 2; i++) {
+          player.cards.push(...this.generatePack(colors));
+        }
+      }
+
+      // Mélanger les cartes
+      player.shuffle();
+    }
+  }
+
+  /**
+   * Génère un paquet de carte d'une couleur aléatoire parmis la liste des couleurs données
+   * @param colors Liste des couleurs
+   * @returns Paquet de cartes
+   */
+  public generatePack(colors: Colors[]): Card[] {
+    const cards = [];
+    const randomColor = Math.floor(Math.random() * colors.length);
+
+    for (let i = 1; i <= 9; i++) {
+      const card = new Card({
+        color: colors[randomColor],
+        value: i as Range<1, 9>,
+      });
+
+      cards.push(card);
+    }
+
+    colors.splice(randomColor, 1);
+    return cards;
+  }
+}

@@ -1,5 +1,6 @@
 import { getTimestamp } from "@/utils/utils";
-import { GameMove } from "./GameMove.class";
+import { GameParticipation } from "./GameParticipation.class";
+import { GameRound } from "./GameRound.class";
 import { Player } from "./Player.class";
 
 /**
@@ -44,7 +45,12 @@ export class Game {
   /**
    * Nombre de manches pour gagner la partie
    */
-  public nbRound?: number;
+  public nbRound: number = 0;
+
+  /**
+   * Manche actuelle
+   */
+  public currentRound: number = 1;
 
   /**
    * Joueurs qui participent à la partie
@@ -52,9 +58,9 @@ export class Game {
   public players: Player[] = [];
 
   /**
-   * Cartes posées par les joueurs dans la partie
+   * Manches de la partie
    */
-  public moves: GameMove[] = [];
+  public rounds: GameRound[] = [];
 
   /**
    * Nombre de joueurs dans la partie
@@ -114,18 +120,29 @@ export class Game {
    * Démarre la partie
    */
   public start() {
-    this.moves.push(
-      new GameMove({ game: this, player: this.chooseRandomPlayer() })
-    );
+    const participations = [];
+    for (const player of this.players) {
+      participations.push(new GameParticipation({ player }));
+    }
+    for (let i = 0; i < this.nbRound; i++) {
+      this.rounds.push(new GameRound({ players: participations }));
+    }
   }
 
   /**
-   * Choisi un joueur aléatoire dans la partie
-   * @returns Un joueur aléatoire parmi les joueurs de la partie
+   * Détermine la manche en cours
+   * @returns La manche actuelle
    */
-  public chooseRandomPlayer() {
-    const randomIndex = Math.floor(Math.random() * this.players.length);
-    return this.players[randomIndex];
+  public getCurrentRound() {
+    return this.rounds[this.currentRound - 1];
+  }
+
+  /**
+   * Détermine le joueur qui doit jouer
+   * @returns Le joueur qui doit jouer
+   */
+  public getCurrentPlayer() {
+    return this.getCurrentRound()?.moves?.at(-1)?.participation;
   }
 
   /**
@@ -134,7 +151,10 @@ export class Game {
    * @param nbPlayer Nombre de joueurs dans chaque partie
    * @returns Réponse de l'API
    */
-  public static async generate(nbGame: number, nbPlayer: number): Promise<[boolean, {message: string}]> {
+  public static async generate(
+    nbGame: number,
+    nbPlayer: number
+  ): Promise<[boolean, { message: string }]> {
     const res = await fetch("http://localhost:3002/game/generate", {
       method: "POST",
       headers: {
