@@ -18,14 +18,13 @@ import {
 } from "@/components/ui/select";
 import { Game } from "@/types/Game.class";
 import { Player } from "@/types/Player.class";
+import { useAtom } from "jotai";
 import { Plus, Trash, XCircle } from "lucide-react";
 import { useState } from "react";
-import { useAtom } from "jotai";
 
-import { MagicMotion } from "react-magic-motion";
-import { Link } from "react-router-dom";
-import { gameInProgress } from "@/utils/store";
 import { useToast } from "@/components/ui/use-toast";
+import { gameInProgress } from "@/utils/store";
+import { Link } from "react-router-dom";
 
 export default function CreateGame() {
   const [game, setGame] = useAtom(gameInProgress);
@@ -106,38 +105,36 @@ export default function CreateGame() {
         <CardDescription>Ajouter les joueurs de la partie</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <MagicMotion>
-          <div className="flex flex-col gap-2">
-            {players.map((player, index) => (
-              <div className="flex gap-2" key={index}>
-                <Input
-                  value={player}
-                  id={`player-${index}`}
-                  name={`player-${index}`}
-                  placeholder="John Doe"
-                  onChange={(event) => handlePlayersChange(index, event)}
-                />
-                <Button
-                  disabled={disableDeletePlayers}
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => deletePlayer(index)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              variant="secondary"
-              className="w-fit"
-              onClick={addPlayer}
-              disabled={disableAddPlayers}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Ajouter un joueur
-            </Button>
-          </div>
-        </MagicMotion>
+        <div className="flex flex-col gap-2">
+          {players.map((player, index) => (
+            <div className="flex gap-2" key={index}>
+              <Input
+                value={player}
+                id={`player-${index}`}
+                name={`player-${index}`}
+                placeholder="John Doe"
+                onChange={(event) => handlePlayersChange(index, event)}
+              />
+              <Button
+                disabled={disableDeletePlayers}
+                variant="destructive"
+                size="icon"
+                onClick={() => deletePlayer(index)}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          <Button
+            variant="secondary"
+            className="w-fit"
+            onClick={addPlayer}
+            disabled={disableAddPlayers}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Ajouter un joueur
+          </Button>
+        </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="nbPlayer">Nombre de manches pour gagner</Label>
           <Select

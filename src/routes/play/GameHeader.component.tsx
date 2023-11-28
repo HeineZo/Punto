@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { gameInProgress } from "@/utils/store";
-import clsx from "clsx";
 import { useAtom } from "jotai";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -11,15 +10,21 @@ import { Link } from "react-router-dom";
 export default function GameHeader() {
   const [game, setGame] = useAtom(gameInProgress);
 
+  /**
+   * Affiche les couleurs des cartes du joueur courant
+   */
   function displayCardColors() {
+    // Couleurs possible des cartes
     const colorVariants = {
       blue: "bg-blue-500 border-blue-200",
       red: "bg-red-500 border-red-200",
       green: "bg-green-500 border-green-200",
       yellow: "bg-yellow-500 border-yellow-200",
     };
+    // Couleurs du joueur courant
     const colors = game?.getCurrentPlayer()?.getColors() ?? [];
     const colorSquares = [];
+    // Pour chaque couleur, on affiche un carré de la couleur
     for (const color of colors) {
       colorSquares.push(
         <span
@@ -47,7 +52,7 @@ export default function GameHeader() {
         <div className="flex gap-2 items-center mt-1">{displayCardColors()}</div>
       </div>
       <div>
-        Manche <strong>{game?.currentRound}</strong> sur{" "}
+        Manche <strong>{game?.getCurrentRound()+1}</strong> sur{" "}
         <strong>{game?.nbRound}</strong>
       </div>
     </div>

@@ -48,11 +48,6 @@ export class Game {
   public nbRound: number = 0;
 
   /**
-   * Manche actuelle
-   */
-  public currentRound: number = 1;
-
-  /**
    * Joueurs qui participent à la partie
    */
   public players: Player[] = [];
@@ -124,9 +119,7 @@ export class Game {
     for (const player of this.players) {
       participations.push(new GameParticipation({ player }));
     }
-    for (let i = 0; i < this.nbRound; i++) {
-      this.rounds.push(new GameRound({ players: participations }));
-    }
+    this.rounds.push(new GameRound({ players: participations }));
   }
 
   /**
@@ -134,7 +127,7 @@ export class Game {
    * @returns La manche actuelle
    */
   public getCurrentRound() {
-    return this.rounds[this.currentRound - 1];
+    return this.rounds.length - 1;
   }
 
   /**
@@ -142,7 +135,7 @@ export class Game {
    * @returns Le joueur qui doit jouer
    */
   public getCurrentPlayer() {
-    return this.getCurrentRound()?.moves?.at(-1)?.participation;
+    return this.rounds[this.getCurrentRound()]?.moves?.at(-1)?.participation;
   }
 
   /**

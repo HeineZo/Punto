@@ -54,4 +54,12 @@ export class GameParticipation {
   public shuffle() {
     this.cards.sort(() => Math.random() - 0.5);
   }
+
+  /**
+   * Récupère la carte à jouer
+   * @returns La carte à jouer
+   */
+  public getCardToPlay() {
+    return this.cards?.at(-1);
+  }
 }
