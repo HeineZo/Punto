@@ -7,7 +7,7 @@ import { columns } from "./columns";
 
 export default function History() {
   const { data, error } = useFetch<Game[]>(
-    "http://localhost:3002/game/findAll"
+    "http://localhost:3002/game"
   );
 
   if (error) {

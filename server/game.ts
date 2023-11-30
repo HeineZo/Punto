@@ -12,7 +12,7 @@ export const router = express.Router();
 /**
  * Récupérer toutes les parties
  */
-router.get("/findAll", async (req, res) => {
+router.get("/", async (req, res) => {
   const games = await Game.findAll();
   res.send(await Promise.all(games.map((game) => game.toClient())));
 });
@@ -60,6 +60,7 @@ router.post("/new", async ({ body }, res) => {
 
   return res.send(await game.toClient());
 });
+
 
 /**
  * Générer des parties aléatoires
@@ -126,8 +127,8 @@ router.post("/generate", async ({ body }, res) => {
         ),
         color: colors[Math.floor(Math.random() * colors.length)],
         value: randomInt(1, 9) as Range<1, 9>,
-        rowPosition: randomInt(1, 6) as Range<1, 6>,
-        colPosition: randomInt(1, 6) as Range<1, 6>,
+        rowPosition: randomInt(1, 7) as Range<1, 7>,
+        colPosition: randomInt(1, 7) as Range<1, 7>,
       });
       success = await gameMove.save();
       if (!success) {

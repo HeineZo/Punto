@@ -52,7 +52,21 @@ export class GameParticipation {
    * Mélange les cartes du joueur
    */
   public shuffle() {
-    this.cards.sort(() => Math.random() - 0.5);
+    let currentIndex = this.cards.length;
+    let temporaryValue;
+    let randomIndex;
+
+    // Tant qu'il y a encore une carte à mélanger
+    while (currentIndex) {
+      // On prend une carte au hasard
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+
+      // On remplace la carte choisi aléatoirement par la carte courante
+      temporaryValue = this.cards[currentIndex];
+      this.cards[currentIndex] = this.cards[randomIndex];
+      this.cards[randomIndex] = temporaryValue;
+    }
   }
 
   /**
@@ -61,5 +75,34 @@ export class GameParticipation {
    */
   public getCardToPlay() {
     return this.cards?.at(-1);
+  }
+
+  /**
+   * Place une carte sur le plateau
+   */
+  public placeCard() {
+    this.cards.pop();
+    this.nbMove++;
+  }
+
+  /**
+   * Récupère les participations d'une partie
+   * @param idGame Identifiant de la partie
+   * @returns Participations trouvées
+   */
+  public static async findFromGame(idGame: number) {
+    try {
+      const res = await fetch(
+        "http://localhost:3002/participation/game/" + idGame
+      );
+      const result = await res.json();
+      return result.map(
+        (participation: GameParticipation) =>
+          new GameParticipation(participation)
+      );
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
   }
 }

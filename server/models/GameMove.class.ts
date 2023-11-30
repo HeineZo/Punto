@@ -31,12 +31,12 @@ export default class GameMove {
   /**
    * Position horizontale de la carte sur le plateau
    */
-  public rowPosition: Range<1, 6>;
+  public rowPosition: Range<1, 7>;
 
   /**
    * Position verticale de la carte sur le plateau
    */
-  public colPosition: Range<1, 6>;
+  public colPosition: Range<1, 7>;
 
   /**
    * Date à laquelle la carte a été jouée
@@ -45,6 +45,14 @@ export default class GameMove {
 
   constructor(init: Partial<GameMove>) {
     Object.assign(this, init);
+  }
+
+  /**
+   * Renvoi les données au client
+   * @returns Données de la classe avec des informations supplémentaires
+   */
+  public async toClient() {
+    return this;
   }
 
   /**

@@ -78,7 +78,6 @@ export default class GameParticipation {
       return false;
     }
   }
-    
 
   /**
    * Récupère le nombre de joueurs dans une partie
@@ -106,5 +105,19 @@ export default class GameParticipation {
       [id]
     );
     return Player.rowToObject(rows);
+  }
+
+  /**
+   * Récupère les participations à une partie
+   * @param id Identifiant de la partie
+   * @returns Participations trouvées
+   */
+  public static async findFromGame(id: number): Promise<GameParticipation[]> {
+    const [rows] = await db.query(
+      `SELECT * FROM ${this.tableName}
+      WHERE idGame = ?`,
+      [id]
+    );
+    return GameParticipation.rowToObject(rows);
   }
 }

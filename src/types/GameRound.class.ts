@@ -10,11 +10,6 @@ import { Colors, Range } from "./type";
  */
 export class GameRound {
   /**
-   * Identifiant de la manche
-   */
-  public id?: number;
-
-  /**
    * Gagnant de la manche
    */
   public winner?: Player;
@@ -46,9 +41,7 @@ export class GameRound {
   public constructor(init?: Partial<GameRound>) {
     Object.assign(this, init);
     this.distributeCards();
-    this.moves.push(
-      new GameMove({ participation: this.chooseRandomPlayer() })
-    );
+    this.moves.push(new GameMove({ participation: this.chooseRandomPlayer() }));
   }
 
   /**
@@ -61,6 +54,38 @@ export class GameRound {
   }
 
   /**
+   * Place une carte sur le plateau
+   */
+  public placeCard(rowPosition: Range<1, 7>, colPosition: Range<1, 7>) {
+    const lastMove = this.moves.at(-1);
+
+    if (!lastMove || lastMove?.colPosition || lastMove?.rowPosition) {
+      return;
+    }
+
+    // Place la carte sur le plateau
+    lastMove?.placeCard(rowPosition, colPosition);
+    this.moves[this.moves.length - 1] = lastMove;
+
+    // Incrémente le nombre de cartes jouées pendant la manche
+    this.nbMove++;
+    // Passe au joueur suivant
+    this.nextPlayer();
+  }
+
+  /**
+   * Passe au joueur suivant
+   */
+  public nextPlayer() {
+    const lastMove = this.moves?.at(-1);
+    const lastPlayer = lastMove?.participation?.player;
+    const nextPlayer = this.players.find(
+      (player) => player.id !== lastPlayer?.id
+    );
+    this.moves?.push(new GameMove({ participation: nextPlayer }));
+  }
+
+  /**
    * Distribue les cartes aux joueurs
    */
   public distributeCards() {
@@ -68,10 +93,10 @@ export class GameRound {
 
     for (const player of this.players) {
       if (this.players.length > 2) {
-        player.cards.push(...this.generatePack(colors));
+        player.cards.push(...this.generateDeck(colors));
       } else {
         for (let i = 0; i < 2; i++) {
-          player.cards.push(...this.generatePack(colors));
+          player.cards.push(...this.generateDeck(colors));
         }
       }
 
@@ -85,7 +110,7 @@ export class GameRound {
    * @param colors Liste des couleurs
    * @returns Paquet de cartes
    */
-  public generatePack(colors: Colors[]): Card[] {
+  public generateDeck(colors: Colors[]): Card[] {
     const cards = [];
     const randomColor = Math.floor(Math.random() * colors.length);
 

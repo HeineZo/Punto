@@ -94,7 +94,7 @@ export default function CreateGame() {
         action: <XCircle />,
       });
     }
-    newGame.start();
+    await newGame.start();
     setGame(newGame);
   }
 

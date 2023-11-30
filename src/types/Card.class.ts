@@ -18,12 +18,12 @@ export class Card {
   /**
    * Position horizontale de la carte sur le plateau
    */
-  public rowPosition?: Range<1, 6>;
+  public rowPosition?: Range<1, 7>;
 
   /**
    * Position verticale de la carte sur le plateau
    */
-  public colPosition?: Range<1, 6>;
+  public colPosition?: Range<1, 7>;
 
   /**
    * Date à laquelle la carte a été jouée

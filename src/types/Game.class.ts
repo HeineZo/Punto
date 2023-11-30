@@ -2,6 +2,7 @@ import { getTimestamp } from "@/utils/utils";
 import { GameParticipation } from "./GameParticipation.class";
 import { GameRound } from "./GameRound.class";
 import { Player } from "./Player.class";
+import { Range } from "./type";
 
 /**
  * Classe représentant une partie
@@ -40,7 +41,7 @@ export class Game {
   /**
    * Nombre de cartes posées par tous les joueurs dans la partie
    */
-  public nbMove?: number;
+  public nbMove: number = 0;
 
   /**
    * Nombre de manches pour gagner la partie
@@ -114,12 +115,17 @@ export class Game {
   /**
    * Démarre la partie
    */
-  public start() {
-    const participations = [];
-    for (const player of this.players) {
-      participations.push(new GameParticipation({ player }));
-    }
+  public async start() {
+    const participations = await GameParticipation.findFromGame(this.id ?? -1);
     this.rounds.push(new GameRound({ players: participations }));
+  }
+
+  /**
+   * Place une carte dans la partie
+   */
+  public placeCard(rowPosition: Range<1, 7>, colPosition: Range<1, 7>) {
+    this.rounds[this.getCurrentRound()].placeCard(rowPosition, colPosition);
+    this.nbMove++;
   }
 
   /**
