@@ -42,4 +42,11 @@ export class Player {
   constructor(init: Partial<Player>) {
     Object.assign(this, init);
   }
+
+  /**
+   * Ajoute une victoire au joueur
+   */
+  public addVictory() {
+    this.nbVictory++;
+  }
 }

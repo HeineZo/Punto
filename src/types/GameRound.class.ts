@@ -1,4 +1,4 @@
-import { enumToArray } from "@/utils/utils";
+import { enumToArray, getTimestamp } from "@/utils/utils";
 import { Card } from "./Card.class";
 import { GameMove } from "./GameMove.class";
 import { GameParticipation } from "./GameParticipation.class";
@@ -35,6 +35,11 @@ export class GameRound {
   public duration: number = 0;
 
   /**
+   * Date à laquelle la manché a été commencée
+   */
+  public createdAt: number = getTimestamp();
+
+  /**
    * Construis une nouvelle manche
    * @param init Données de la nouvelle manche
    */
@@ -42,6 +47,20 @@ export class GameRound {
     Object.assign(this, init);
     this.distributeCards();
     this.moves.push(new GameMove({ participation: this.chooseRandomPlayer() }));
+  }
+
+  /**
+   * Retourne le dernier coup qui a été joué
+   * @returns La dernière coup qui a été joué
+   */
+  public getLastmove() {
+    return this.moves[this.moves.length - 1];
+  }
+
+  public endRound() {
+    this.duration = getTimestamp() - this.createdAt;
+    this.winner = this.getLastmove().participation?.player;
+    this.players.forEach(player => player.cards = []);
   }
 
   /**

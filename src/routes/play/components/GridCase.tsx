@@ -84,7 +84,6 @@ export default function GridCase({ rowPosition, colPosition }: Props) {
     game?.placeCard(rowPosition, colPosition);
     grid[rowPosition - 1][colPosition - 1] = cardToPlace;
 
-    // setCurrentCard(cardToPlace);
     setGrid([...grid]);
     setGame(new Game(game));
   }
