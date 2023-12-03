@@ -107,9 +107,6 @@ export default class Game {
           this.id = result.lastInsertRowid;
           break;
         case "mongodb":
-          // const game = new MongoGame(this);
-          // await game.save();
-          // this.id = game.id;
           break;
       }
       return true;
