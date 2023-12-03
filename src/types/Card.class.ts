@@ -1,4 +1,4 @@
-import { getTimestamp } from "@/utils/utils";
+import { getTimestamp } from "@/lib/utils";
 import { Colors, Range } from "./type";
 
 /**

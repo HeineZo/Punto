@@ -1,4 +1,4 @@
-import { getTimestamp } from "@/utils/utils";
+import { getTimestamp } from "@/lib/utils";
 import { Card } from "./Card.class";
 import { GameParticipation } from "./GameParticipation.class";
 import { Range } from "./type";

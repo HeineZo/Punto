@@ -1,7 +1,7 @@
 import { Card } from "@/types/Card.class";
 import { Game } from "@/types/Game.class";
 import { Range } from "@/types/type";
-import { gameGrid, gameInProgress } from "@/utils/store";
+import { gameGrid, gameInProgress } from "@/lib/store";
 import clsx from "clsx";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";

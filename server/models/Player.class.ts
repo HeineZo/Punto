@@ -1,6 +1,6 @@
 import { ResultSetHeader } from "mysql2";
 import db from "../config/db";
-import { getTimestamp } from "../../src/utils/utils";
+import { getTimestamp } from "../../src/lib//utils";
 
 /**
  * Classe représentant un joueur
@@ -18,11 +18,6 @@ export default class Player {
   public pseudo: string;
 
   /**
-   * Mot de passe du joueur
-   */
-  public password: string;
-
-  /**
    * Nombre de cartes posées par le joueur toute partie confondue
    */
   public nbMove: number;
@@ -33,17 +28,16 @@ export default class Player {
   public nbVictory: number;
 
   /**
-   * Nombre de défaites du joueur
-   */
-  public nbDefeat: number;
-
-  /**
    * Date à laquelle la partie a été jouée
    */
   public createdAt: number = getTimestamp();
 
   constructor(init: Partial<Player>) {
-    Object.assign(this, init);
+    Object.keys(init).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(this, key)) {
+        (this as typeof init)[key] = init[key];
+      }
+    });
   }
 
   /**
@@ -64,7 +58,6 @@ export default class Player {
       pseudo: this.pseudo,
       nbMove: this.nbMove,
       nbVictory: this.nbVictory,
-      nbDefeat: this.nbDefeat,
       createdAt: this.createdAt,
     };
   }
@@ -79,6 +72,23 @@ export default class Player {
         this
       );
       this.id = (result as ResultSetHeader).insertId;
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  /**
+   * Met à jour le joueur dans la base de donnée
+   * @returns True si le joueur a été modifié, false sinon
+   */
+  public async update() {
+    try {
+      await db.query(`UPDATE ${Player.tableName} SET ? WHERE id = ?`, [
+        this,
+        this.id,
+      ]);
       return true;
     } catch (err) {
       console.error(err);

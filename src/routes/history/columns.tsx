@@ -12,13 +12,17 @@ export const columns: ColumnDef<Game>[] = [
     accessorKey: "winner",
     header: "Gagnant",
     cell: ({ row }) => {
-      const winner = new Player(row.getValue("winner"));
-
-      if (!winner.id) {
+      const duration = Number(row.getValue("duration"));
+      if (duration <= 0) {
         return (
           <p className="font-bold text-red-500 animate-pulse">• En cours</p>
         );
       }
+      const winner = new Player(row.getValue("winner"));
+      if (!winner.id) {
+        return <p className="font-bold text-blue-500">Egalité</p>;
+      }
+
       return winner.pseudo;
     },
   },

@@ -1,4 +1,4 @@
-import { getTimestamp } from "@/utils/utils";
+import { getTimestamp } from "@/lib/utils";
 
 /**
  * Classe représentant un joueur
@@ -15,11 +15,6 @@ export class Player {
   public pseudo?: string;
 
   /**
-   * Mot de passe du joueur
-   */
-  public password?: string;
-
-  /**
    * Nombre de cartes posées par le joueur toute partie confondue
    */
   public nbMove: number = 0;
@@ -28,11 +23,6 @@ export class Player {
    * Nombre de victoires du joueur
    */
   public nbVictory: number = 0;
-
-  /**
-   * Nombre de défaites du joueur
-   */
-  public nbDefeat: number = 0;
 
   /**
    * Date à laquelle la partie a été jouée

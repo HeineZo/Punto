@@ -19,32 +19,45 @@ import {
 import { Game } from "@/types/Game.class";
 import { Player } from "@/types/Player.class";
 import { useAtom } from "jotai";
-import { Plus, Trash, XCircle } from "lucide-react";
+import {
+  Database,
+  DatabaseZap,
+  Leaf,
+  Plus,
+  Trash,
+  XCircle,
+} from "lucide-react";
 import { useState } from "react";
 
+import Help from "@/components/shared/Help.component";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { gameInProgress } from "@/utils/store";
+import { gameInProgress } from "@/lib/store";
 import { Link } from "react-router-dom";
 
 export default function CreateGame() {
   const [game, setGame] = useAtom(gameInProgress);
   const { toast } = useToast();
 
-  const [players, setPlayers] = useState<string[]>(
-    new Array(Game.minNbPlayer).fill("")
+  const [newGame, setNewGame] = useState(
+    new Game({
+      nbPlayer: Game.minNbPlayer,
+      players: [new Player({ pseudo: "" }), new Player({ pseudo: "" })],
+      nbRound: Game.minNbRound,
+      database: "mysql",
+    })
   );
-  const [nbRound, setNbRound] = useState<number>(Game.minNbRound);
 
   // Désactive le bouton de démarrage si il n'y a pas au moins 2 joueurs
   const disableStartButton =
-    players.filter(
-      (element) => typeof element === "string" && element.trim() !== ""
-    ).length < Game.minNbPlayer;
+    newGame.players.every(
+      (player) => player.pseudo && player.pseudo.trim() !== ""
+    ) && newGame.players.length >= Game.minNbPlayer;
 
   // Désactive le bouton de suppression de joueurs si il n'y a pas au moins le nombre minimum de joueurs
-  const disableDeletePlayers = players.length <= Game.minNbPlayer;
+  const disableDeletePlayers = newGame.players.length <= Game.minNbPlayer;
   // Désactive le bouton d'ajout de joueurs si il y a déjà le nombre maximum de joueurs
-  const disableAddPlayers = players.length >= Game.maxNbPlayer;
+  const disableAddPlayers = newGame.players.length >= Game.maxNbPlayer;
 
   /**
    * Lorsqu'un joueur change de nom, met à jour la liste des joueurs
@@ -55,16 +68,17 @@ export default function CreateGame() {
     index: number,
     event: React.ChangeEvent<HTMLInputElement>
   ) {
-    const data = [...players];
-    data[index] = event.target.value;
-    setPlayers(data);
+    const data = [...newGame.players];
+    data[index].pseudo = event.target.value;
+    setNewGame(new Game({ ...newGame, players: data }));
   }
 
   /**
    * Ajoute un joueur à la liste
    */
   function addPlayer() {
-    setPlayers([...players, ""]);
+    newGame.addPlayer(new Player({}));
+    setNewGame(new Game(newGame));
   }
 
   /**
@@ -72,19 +86,15 @@ export default function CreateGame() {
    * @param index Indice du joueur à supprimer
    */
   function deletePlayer(index: number) {
-    const data = [...players];
-    data.splice(index, 1);
-    setPlayers(data);
+    const updatedPlayers = [...newGame.players];
+    updatedPlayers.splice(index, 1);
+    setNewGame(new Game({ ...newGame, players: updatedPlayers }));
   }
 
   /**
    * Démarre la partie
    */
   async function handleStart() {
-    const newGame = new Game({ nbPlayer: players.length, nbRound });
-    for (const player of players) {
-      newGame.addPlayer(new Player({ pseudo: player }));
-    }
     const success = await newGame.save();
     if (!success) {
       toast({
@@ -106,10 +116,10 @@ export default function CreateGame() {
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          {players.map((player, index) => (
+          {newGame.players.map((player, index) => (
             <div className="flex gap-2" key={index}>
               <Input
-                value={player}
+                value={player.pseudo}
                 id={`player-${index}`}
                 name={`player-${index}`}
                 placeholder="John Doe"
@@ -138,11 +148,13 @@ export default function CreateGame() {
         <div className="flex flex-col gap-2">
           <Label htmlFor="nbPlayer">Nombre de manches pour gagner</Label>
           <Select
-            defaultValue={nbRound.toString()}
-            onValueChange={(nbRound) => setNbRound(Number(nbRound))}
+            defaultValue={newGame.nbRound.toString()}
+            onValueChange={(nbRound) =>
+              setNewGame(new Game({ ...newGame, nbRound: Number(nbRound) }))
+            }
           >
             <SelectTrigger id="nbRound" name="nbRound">
-              <SelectValue defaultValue={nbRound} />
+              <SelectValue defaultValue={newGame.nbRound} />
             </SelectTrigger>
             <SelectContent position="popper">
               {Array.from(
@@ -159,12 +171,44 @@ export default function CreateGame() {
             </SelectContent>
           </Select>
         </div>
+        <div className="flex flex-col gap-2">
+          <Label>Choix de la base de données</Label>
+          <Tabs
+            defaultValue="mysql"
+            onValueChange={(value) =>
+              setNewGame(
+                new Game({
+                  ...newGame,
+                  database: value as "mysql" | "sqlite" | "mongodb",
+                })
+              )
+            }
+          >
+            <TabsList>
+              <Help text="MySQL">
+                <TabsTrigger value="mysql">
+                  <Database className="h-5 w-5" />
+                </TabsTrigger>
+              </Help>
+              <Help text="SQLite">
+                <TabsTrigger value="sqlite">
+                  <DatabaseZap className="h-5 w-5" />
+                </TabsTrigger>
+              </Help>
+              <Help text="MongoDB">
+                <TabsTrigger value="mongodb">
+                  <Leaf className="h-5 w-5" />
+                </TabsTrigger>
+              </Help>
+            </TabsList>
+          </Tabs>
+        </div>
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline" asChild>
           <Link to="/">Retour</Link>
         </Button>
-        <Button onClick={handleStart} disabled={disableStartButton}>
+        <Button onClick={handleStart} disabled={!disableStartButton}>
           Démarrer
         </Button>
       </CardFooter>

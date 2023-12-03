@@ -2,7 +2,7 @@ import { ResultSetHeader } from "mysql2";
 import db from "../config/db";
 import Game from "./Game.class";
 import Player from "./Player.class";
-import { getTimestamp } from "../../src/utils/utils";
+import { getTimestamp } from "../../src/lib//utils";
 
 /**
  * Classe représentant une participation d'un joueur dans une partie
@@ -35,7 +35,11 @@ export default class GameParticipation {
   public createdAt: number = getTimestamp();
 
   constructor(init: Partial<GameParticipation>) {
-    Object.assign(this, init);
+    Object.keys(init).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(this, key)) {
+        (this as typeof init)[key] = init[key];
+      }
+    });
   }
 
   /**

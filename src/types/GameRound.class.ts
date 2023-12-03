@@ -1,4 +1,4 @@
-import { enumToArray, getTimestamp } from "@/utils/utils";
+import { enumToArray, findLast, getTimestamp } from "@/lib/utils";
 import { Card } from "./Card.class";
 import { GameMove } from "./GameMove.class";
 import { GameParticipation } from "./GameParticipation.class";
@@ -57,10 +57,17 @@ export class GameRound {
     return this.moves[this.moves.length - 1];
   }
 
+  /**
+   * Termine la manche
+   */
   public endRound() {
     this.duration = getTimestamp() - this.createdAt;
-    this.winner = this.getLastmove().participation?.player;
-    this.players.forEach(player => player.cards = []);
+    this.winner = findLast(
+      this.moves,
+      (move) =>
+        move?.rowPosition !== undefined && move?.colPosition !== undefined
+    )?.participation?.player;
+    this.players.forEach((player) => (player.cards = []));
   }
 
   /**

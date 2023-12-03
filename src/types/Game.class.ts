@@ -1,4 +1,4 @@
-import { getTimestamp } from "@/utils/utils";
+import { getTimestamp } from "@/lib/utils";
 import { GameParticipation } from "./GameParticipation.class";
 import { GameRound } from "./GameRound.class";
 import { Player } from "./Player.class";
@@ -69,38 +69,21 @@ export class Game {
   public duration?: number;
 
   /**
+   * Base de donnée utilisée pour la partie
+   */
+  public database?: "mysql" | "sqlite" | "mongodb";
+
+  /**
    * Date à laquelle la partie a été jouée
    */
-  public createdAt: number = getTimestamp();
+  public createdAt?: number;
 
   /**
    * Construis une nouvelle partie
    * @param init Données de la nouvelle partie
    */
-  public constructor(init?: Partial<Game>) {
+  public constructor(init: Partial<Game>) {
     Object.assign(this, init);
-  }
-
-  /**
-   * Sauvegarde la partie dans la base de donnée
-   * @returns True si la partie a été sauvegardée, false sinon
-   */
-  public async save(): Promise<boolean> {
-    try {
-      const res = await fetch("http://localhost:3002/game/new", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(this),
-      });
-
-      Object.assign(this, await res.json());
-      return true;
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
   }
 
   /**
@@ -128,6 +111,7 @@ export class Game {
     }
     // On ajoute la nouvelle manche
     this.rounds.push(new GameRound({ players: participations }));
+    this.createdAt = getTimestamp();
   }
 
   /**
@@ -151,6 +135,11 @@ export class Game {
    */
   public endRound() {
     this.rounds[this.getCurrentRound()].endRound();
+    const roundWinner = this.rounds[this.getCurrentRound()].winner;
+    const winner = this.players.find((player) => player.id === roundWinner?.id);
+    if (winner) {
+      winner.nbVictory++;
+    }
 
     if (this.rounds.length === this.nbRound) {
       this.endGame();
@@ -160,9 +149,10 @@ export class Game {
   /**
    * Fini la partie
    */
-  public endGame() {
+  public async endGame() {
     this.duration = getTimestamp() - this.createdAt;
     this.winner = this.determineGameWinner();
+    return await this.update();
   }
 
   /**
@@ -186,38 +176,57 @@ export class Game {
    * @returns Le joueur qui a gagné la partie
    */
   public determineGameWinner() {
-    const playerWins: { player: Player; wins: number }[] = [];
-
-    // Parcourir chaque manche
-    this.rounds.forEach((round: GameRound) => {
-      const winner = round.winner;
-      if (winner) {
-        // Vérifier si le joueur a déjà gagné une manche
-        const index = playerWins.findIndex(
-          (item) => item.player.id === winner.id
-        );
-        // S'il existe déjà dans la liste on incrémente son nombre de victoires, sinon on en crée un nouveau
-        if (index !== -1) {
-          playerWins[index].wins++;
-        } else {
-          playerWins.push({ player: winner, wins: 1 });
-        }
-      }
-    });
-
-    // Trier les joueurs par nombre de victoires
-    const sortedPlayers = playerWins.slice().sort((a, b) => b.wins - a.wins);
-    // Récupérer le nombre de victoires du joueur avec le plus de victoires
-    const mostWins = sortedPlayers[0].wins;
-    // Récupérer les joueurs avec le plus de victoires
-    const playersWithMostWins = sortedPlayers.filter(
-      (player) => player.wins === mostWins
-    );
-
     // Retourner le joueur avec le plus de victoires
-    return playersWithMostWins.length === 1
-      ? playersWithMostWins[0].player
-      : null;
+    return this.players.reduce((prevPlayer, nextPlayer) => {
+      if (prevPlayer.nbVictory < nextPlayer.nbVictory) {
+        return nextPlayer;
+      }
+      return prevPlayer;
+    });
+  }
+
+  /**
+   * Sauvegarde la partie dans la base de donnée
+   * @returns True si la partie a été sauvegardée, false sinon
+   */
+  public async save(): Promise<boolean> {
+    try {
+      const res = await fetch("http://localhost:3002/game", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(this),
+      });
+
+      Object.assign(this, await res.json());
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  /**
+   * Met à jour la base la partie dans la base de donnée
+   * @returns True si la partie a été sauvegardée, false sinon
+   */
+  public async update(): Promise<boolean> {
+    try {
+      const res = await fetch("http://localhost:3002/game", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(this),
+      });
+
+      Object.assign(this, await res.json());
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 
   /**

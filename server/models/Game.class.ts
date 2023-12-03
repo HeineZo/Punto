@@ -1,8 +1,8 @@
 import { ResultSetHeader } from "mysql2";
-import db from "../config/db.js";
 import GameParticipation from "./GameParticipation.class.js";
 import Player from "./Player.class.js";
-import { getTimestamp } from "../../src/utils/utils.js";
+import { getTimestamp } from "../../src/lib//utils.js";
+import db from "../config/db.js";
 
 /**
  * Classe représentant une partie
@@ -44,8 +44,12 @@ export default class Game {
    */
   public createdAt: number = getTimestamp();
 
-  constructor(init?: Partial<Game>) {
-    Object.assign(this, init);
+  constructor(init: Partial<Game>) {
+    Object.keys(init).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(this, key)) {
+        (this as typeof init)[key] = init[key];
+      }
+    });
   }
 
   /**
@@ -78,6 +82,7 @@ export default class Game {
 
   /**
    * Sauvegarde la partie dans la base de donnée
+   * @returns True si la partie a été sauvegardée, false sinon
    */
   public async save() {
     try {
@@ -86,6 +91,23 @@ export default class Game {
         this
       );
       this.id = (result as ResultSetHeader).insertId;
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  /**
+   * Met à jour la partie dans la base de donnée
+   * @returns True si la partie a été mise à jour, false sinon
+   */
+  public async update() {
+    try {
+      await db.query(`UPDATE ${Game.tableName} SET ? WHERE id = ?`, [
+        this,
+        this.id,
+      ]);
       return true;
     } catch (err) {
       console.error(err);

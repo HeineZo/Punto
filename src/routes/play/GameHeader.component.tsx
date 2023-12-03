@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { gameInProgress } from "@/utils/store";
+import { gameInProgress } from "@/lib/store";
 import { useAtom } from "jotai";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";

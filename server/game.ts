@@ -5,7 +5,7 @@ import GameMove from "./models/GameMove.class.ts";
 import GameParticipation from "./models/GameParticipation.class.ts";
 import Player from "./models/Player.class.ts";
 import { Colors, Range } from "./models/type.ts";
-import { enumToArray, getTimestamp } from "../src/utils/utils.ts";
+import { enumToArray, getTimestamp } from "../src/lib/utils.ts";
 
 export const router = express.Router();
 
@@ -26,7 +26,7 @@ router.get("/find/:id", async (req, res) => {
   return res.send(await game.toClient());
 });
 
-router.post("/new", async ({ body }, res) => {
+router.post("/", async ({ body }, res) => {
   const { players, nbRound, createdAt } = body;
   const game = new Game({ nbRound, createdAt });
   const success = await game.save();
@@ -61,6 +61,36 @@ router.post("/new", async ({ body }, res) => {
   return res.send(await game.toClient());
 });
 
+router.put("/", async ({ body }, res) => {
+  const { players, winner, ...rest } = body;
+  const game = new Game({ idWinner: winner?.id ?? null, ...rest });
+  const success = await game.update();
+  if (!success) {
+    return res
+      .status(500)
+      .send({ message: "Erreur lors de la sauvegarde de la partie" });
+  }
+
+  // Sauvegarde des joueurs et de leur participation
+  for (const player of players) {
+    const newPlayer = new Player(player);
+    const success = await newPlayer.update();
+    if (!success) {
+      return res
+        .status(500)
+        .send({ message: "Erreur lors de la sauvegarde du joueur" });
+    }
+    //   const participations = GameParticipation.findFromGame(game.id);
+    //   success = await participation.save();
+    //   if (!success) {
+    //     return res
+    //       .status(500)
+    //       .send({ message: "Erreur lors de la sauvegarde de la participation" });
+    //   }
+  }
+
+  return res.send(true);
+});
 
 /**
  * Générer des parties aléatoires

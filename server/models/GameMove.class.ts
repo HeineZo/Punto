@@ -1,5 +1,5 @@
 import { ResultSetHeader } from "mysql2";
-import { getTimestamp } from "../../src/utils/utils";
+import { getTimestamp } from "../../src/lib//utils";
 import db from "../config/db";
 import { Colors, Range } from "./type";
 
