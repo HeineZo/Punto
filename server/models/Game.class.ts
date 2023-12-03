@@ -1,8 +1,9 @@
+/* eslint-disable no-case-declarations */
 import { ResultSetHeader } from "mysql2";
 import GameParticipation from "./GameParticipation.class.js";
 import Player from "./Player.class.js";
 import { getTimestamp } from "../../src/lib//utils.js";
-import db from "../config/db.js";
+import { MySQLConnection, SQLiteConnection, MongoGame } from "../config/db.js";
 
 /**
  * Classe représentant une partie
@@ -57,7 +58,10 @@ export default class Game {
    * @param rows Données récupérées de la base de donnée
    */
   public static rowToObject(rows): Game[] {
-    return rows.map((row) => new Game(row));
+    if (rows) {
+      return rows.map((row) => new Game(row));
+    }
+    return [];
   }
 
   /**
@@ -85,12 +89,29 @@ export default class Game {
    * @returns True si la partie a été sauvegardée, false sinon
    */
   public async save() {
+    let result;
+    const { id, ...rest } = this;
     try {
-      const [result] = await db.query(
-        `INSERT INTO ${Game.tableName} SET ?`,
-        this
-      );
-      this.id = (result as ResultSetHeader).insertId;
+      switch (global.databaseType) {
+        case "mysql":
+          [result] = await MySQLConnection.query(
+            `INSERT INTO ${Game.tableName} SET ?`,
+            this
+          );
+          this.id = (result as ResultSetHeader).insertId;
+          break;
+        case "sqlite":
+          result = SQLiteConnection.prepare(
+            `INSERT INTO ${Game.tableName}(idWinner, nbPlayer, nbMove, nbRound, duration, createdAt) VALUES (?, ?, ?, ?, ?, ?)`
+          ).run(Object.values(rest));
+          this.id = result.lastInsertRowid;
+          break;
+        case "mongodb":
+          // const game = new MongoGame(this);
+          // await game.save();
+          // this.id = game.id;
+          break;
+      }
       return true;
     } catch (err) {
       console.error(err);
@@ -103,11 +124,23 @@ export default class Game {
    * @returns True si la partie a été mise à jour, false sinon
    */
   public async update() {
+    const { id, ...rest } = this;
     try {
-      await db.query(`UPDATE ${Game.tableName} SET ? WHERE id = ?`, [
-        this,
-        this.id,
-      ]);
+      switch (global.databaseType) {
+        case "mysql":
+          await MySQLConnection.query(
+            `UPDATE ${Game.tableName} SET ? WHERE id = ?`,
+            [this, this.id]
+          );
+          break;
+        case "sqlite":
+          SQLiteConnection.prepare(
+            `UPDATE ${Game.tableName} SET idWinner = ?, nbPlayer = ?, nbMove = ?, nbRound = ?, duration = ?, createdAt = ? WHERE id = ?`
+          ).run(Object.values(rest), id);
+          break;
+        case "mongodb":
+        // return await this.updateMongoDB();
+      }
       return true;
     } catch (err) {
       console.error(err);
@@ -119,8 +152,22 @@ export default class Game {
    * Retourne toutes les parties
    */
   public static async findAll() {
+    let rows;
     try {
-      const [rows] = await db.query(`SELECT * FROM ${this.tableName}`);
+      switch (global.databaseType) {
+        case "mysql":
+          [rows] = await MySQLConnection.query(
+            `SELECT * FROM ${this.tableName}`
+          );
+          break;
+        case "sqlite":
+          rows = SQLiteConnection.prepare(
+            `SELECT * FROM ${this.tableName}`
+          ).all();
+          break;
+        case "mongodb":
+          break;
+      }
       return this.rowToObject(rows);
     } catch (err) {
       console.error(err);
@@ -134,11 +181,23 @@ export default class Game {
    * @returns Partie trouvée
    */
   public static async find(id: number): Promise<Game | null> {
+    let rows;
     try {
-      const [rows] = await db.query(
-        `SELECT * FROM ${this.tableName} WHERE id = ?`,
-        [id]
-      );
+      switch (global.databaseType) {
+        case "mysql":
+          [rows] = await MySQLConnection.query(
+            `SELECT * FROM ${this.tableName} WHERE id = ?`,
+            [id]
+          );
+          break;
+        case "sqlite":
+          rows = SQLiteConnection.prepare(
+            `SELECT * FROM ${this.tableName} WHERE id = ?`
+          ).all(id);
+          break;
+        case "mongodb":
+        // return await this.findAllMongoDB();
+      }
       return this.rowToObject(rows)[0];
     } catch (err) {
       console.error(err);

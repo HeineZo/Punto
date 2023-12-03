@@ -1,8 +1,8 @@
 import { ResultSetHeader } from "mysql2";
-import db from "../config/db";
 import Game from "./Game.class";
 import Player from "./Player.class";
 import { getTimestamp } from "../../src/lib//utils";
+import { MySQLConnection, SQLiteConnection } from "../config/db";
 
 /**
  * Classe représentant une participation d'un joueur dans une partie
@@ -47,7 +47,10 @@ export default class GameParticipation {
    * @param rows Données récupérées de la base de donnée
    */
   public static rowToObject(rows): GameParticipation[] {
-    return rows.map((row) => new GameParticipation(row));
+    if (rows) {
+      return rows.map((row) => new GameParticipation(row));
+    }
+    return [];
   }
 
   /**
@@ -70,12 +73,27 @@ export default class GameParticipation {
    * Sauvegarde la participation d'un joueur à une partie dans la base de donnée
    */
   public async save() {
+    let result;
+    const { id, ...rest } = this;
     try {
-      const [result] = await db.query(
-        `INSERT INTO ${GameParticipation.tableName} SET ?`,
-        this
-      );
-      this.id = (result as ResultSetHeader).insertId;
+      switch (global.databaseType) {
+        case "mysql":
+          [result] = await MySQLConnection.query(
+            `INSERT INTO ${GameParticipation.tableName} SET ?`,
+            this
+          );
+          this.id = (result as ResultSetHeader).insertId;
+          break;
+        case "sqlite":
+          result = SQLiteConnection.prepare(
+            `INSERT INTO ${GameParticipation.tableName}(idGame, idPlayer, nbMove, createdAt) VALUES (?, ?, ?, ?)`
+          ).run(Object.values(rest));
+          this.id = result.lastInsertRowid;
+          break;
+        case "mongodb":
+        // return await this.saveMongoDB();
+        break;
+      }
       return true;
     } catch (err) {
       console.error(err);
@@ -89,11 +107,27 @@ export default class GameParticipation {
    * @returns Nombre de joueurs ayant participé à la partie
    */
   public static async getNbParticipation(id: number) {
-    const [rows] = await db.query(
-      `SELECT COUNT(*) as nbParticipation FROM ${this.tableName} WHERE idGame = ?`,
-      [id]
-    );
-    return rows[0].nbParticipation;
+    let rows;
+    try {
+      switch (global.databaseType) {
+        case "mysql":
+          [rows] = await MySQLConnection.query(
+            `SELECT COUNT(*) as nbParticipation FROM ${this.tableName} WHERE idGame = ?`,
+            [id]
+          );
+          return rows[0].nbParticipation;
+        case "sqlite":
+          rows = SQLiteConnection.prepare(
+            `SELECT COUNT(*) as nbParticipation FROM ${this.tableName} WHERE idGame = ?`
+          ).get(id);
+          return rows.nbParticipation;
+        case "mongodb":
+        // return await this.findAllMongoDB();
+      }
+    } catch (err) {
+      console.error(err);
+      return 0;
+    }
   }
 
   /**
@@ -102,12 +136,31 @@ export default class GameParticipation {
    * @returns Joueurs trouvés
    */
   public static async getPlayers(id: number): Promise<Player[]> {
-    const [rows] = await db.query(
-      `SELECT * FROM ${this.tableName}, ${Player.tableName} 
-        WHERE ${this.tableName}.idPlayer = ${Player.tableName}.id 
-        AND idGame = ?`,
-      [id]
-    );
+    let rows;
+    try {
+      switch (global.databaseType) {
+        case "mysql":
+          [rows] = await MySQLConnection.query(
+            `SELECT * FROM ${this.tableName}, ${Player.tableName} 
+            WHERE ${this.tableName}.idPlayer = ${Player.tableName}.id 
+            AND idGame = ?`,
+            [id]
+          );
+          break;
+        case "sqlite":
+          rows = SQLiteConnection.prepare(
+            `SELECT * FROM ${this.tableName}, ${Player.tableName} 
+            WHERE ${this.tableName}.idPlayer = ${Player.tableName}.id 
+            AND idGame = ?`
+          ).all(id);
+          break;
+        case "mongodb":
+        // return await this.findAllMongoDB();
+      }
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
     return Player.rowToObject(rows);
   }
 
@@ -117,11 +170,27 @@ export default class GameParticipation {
    * @returns Participations trouvées
    */
   public static async findFromGame(id: number): Promise<GameParticipation[]> {
-    const [rows] = await db.query(
-      `SELECT * FROM ${this.tableName}
-      WHERE idGame = ?`,
-      [id]
-    );
+    let rows;
+    try {
+      switch (global.databaseType) {
+        case "mysql":
+          [rows] = await MySQLConnection.query(
+            `SELECT * FROM ${this.tableName} WHERE idGame = ?`,
+            [id]
+          );
+          break;
+        case "sqlite":
+          rows = SQLiteConnection.prepare(
+            `SELECT * FROM ${this.tableName} WHERE idGame = ?`
+          ).all(id);
+          break;
+        case "mongodb":
+        // return await this.findAllMongoDB();
+      }
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
     return GameParticipation.rowToObject(rows);
   }
 }

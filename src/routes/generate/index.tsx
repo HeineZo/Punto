@@ -1,3 +1,4 @@
+import Help from "@/components/shared/Help.component";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,9 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { Game } from "@/types/Game.class";
-import { Check, Loader2 as Loader, XCircle } from "lucide-react";
+import {
+  Check,
+  Database,
+  DatabaseZap,
+  Leaf,
+  Loader2 as Loader,
+  XCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -31,6 +40,7 @@ export default function Generate() {
   const [formData, setFormData] = useState({
     nbGame: 5,
     nbPlayer: Game.minNbPlayer,
+    database: "mysql",
   });
 
   /**
@@ -42,7 +52,11 @@ export default function Generate() {
       description: `Cette opération peut prendre un certain temps`,
       action: <Loader className="animate-spin" />,
     });
-    const [success, data] = await Game.generate(formData.nbGame, formData.nbPlayer);
+    const [success, data] = await Game.generate(
+      formData.nbGame,
+      formData.nbPlayer,
+      formData.database as "mysql" | "sqlite" | "mongodb"
+    );
 
     if (success) {
       toast({
@@ -70,53 +84,81 @@ export default function Generate() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleGenerate}>
-            <div className="grid w-full gap-4">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="nbGame">Nombre de parties</Label>
-                <Input
-                  id="nbGame"
-                  name="nbGame"
-                  placeholder="5"
-                  type="number"
-                  defaultValue={5}
-                  min={1}
-                  onChange={(event) =>
-                    setFormData({
-                      ...formData,
-                      nbGame: Number(event.target.value),
-                    })
-                  }
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="nbPlayer">Nombre de joueurs</Label>
-                <Select
-                  defaultValue={formData.nbPlayer.toString()}
-                  onValueChange={(nbPlayer) =>
-                    setFormData({ ...formData, nbPlayer: Number(nbPlayer) })
-                  }
-                >
-                  <SelectTrigger id="nbPlayer" name="nbPlayer">
-                    <SelectValue defaultValue={formData.nbPlayer.toString()} />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    {Array.from(
-                      { length: Game.maxNbPlayer - Game.minNbPlayer + 1 },
-                      (_, i) => (
-                        <SelectItem
-                          key={i + Game.minNbPlayer}
-                          value={`${i + Game.minNbPlayer}`}
-                        >
-                          {i + Game.minNbPlayer}
-                        </SelectItem>
-                      )
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+          <div className="grid w-full gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="nbGame">Nombre de parties</Label>
+              <Input
+                id="nbGame"
+                name="nbGame"
+                placeholder="5"
+                type="number"
+                defaultValue={5}
+                min={1}
+                onChange={(event) =>
+                  setFormData({
+                    ...formData,
+                    nbGame: Number(event.target.value),
+                  })
+                }
+              />
             </div>
-          </form>
+            <div className="space-y-2">
+              <Label htmlFor="nbPlayer">Nombre de joueurs</Label>
+              <Select
+                defaultValue={formData.nbPlayer.toString()}
+                onValueChange={(nbPlayer) =>
+                  setFormData({ ...formData, nbPlayer: Number(nbPlayer) })
+                }
+              >
+                <SelectTrigger id="nbPlayer" name="nbPlayer">
+                  <SelectValue defaultValue={formData.nbPlayer.toString()} />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {Array.from(
+                    { length: Game.maxNbPlayer - Game.minNbPlayer + 1 },
+                    (_, i) => (
+                      <SelectItem
+                        key={i + Game.minNbPlayer}
+                        value={`${i + Game.minNbPlayer}`}
+                      >
+                        {i + Game.minNbPlayer}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Choix de la base de données</Label>
+              <Tabs
+                defaultValue="mysql"
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    database: value,
+                  })
+                }
+              >
+                <TabsList>
+                  <Help text="MySQL">
+                    <TabsTrigger value="mysql">
+                      <Database className="h-5 w-5" />
+                    </TabsTrigger>
+                  </Help>
+                  <Help text="SQLite">
+                    <TabsTrigger value="sqlite">
+                      <DatabaseZap className="h-5 w-5" />
+                    </TabsTrigger>
+                  </Help>
+                  <Help text="MongoDB">
+                    <TabsTrigger value="mongodb">
+                      <Leaf className="h-5 w-5" />
+                    </TabsTrigger>
+                  </Help>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" asChild>

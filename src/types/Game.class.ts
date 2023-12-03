@@ -237,7 +237,8 @@ export class Game {
    */
   public static async generate(
     nbGame: number,
-    nbPlayer: number
+    nbPlayer: number,
+    database: "mysql" | "sqlite" | "mongodb"
   ): Promise<[boolean, { message: string }]> {
     const res = await fetch("http://localhost:3002/game/generate", {
       method: "POST",
@@ -247,6 +248,7 @@ export class Game {
       body: JSON.stringify({
         nbGame,
         nbPlayer,
+        database
       }),
     });
     return [res.ok, await res.json()];

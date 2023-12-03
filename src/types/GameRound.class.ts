@@ -104,10 +104,13 @@ export class GameRound {
    */
   public nextPlayer() {
     const lastMove = this.moves?.at(-1);
-    const lastPlayer = lastMove?.participation?.player;
-    const nextPlayer = this.players.find(
-      (player) => player.id !== lastPlayer?.id
+    const lastPlayer = lastMove?.participation;
+    const currentIndex = this.players.findIndex(
+      (player) => player.id === lastPlayer?.id
     );
+    const nextIndex = (currentIndex + 1) % this.players.length;
+    const nextPlayer = this.players[nextIndex];
+    console.log(this.players);
     this.moves?.push(new GameMove({ participation: nextPlayer }));
   }
 

@@ -1,0 +1,40 @@
+CREATE TABLE IF NOT EXISTS Game (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+    idWinner INTEGER,
+    nbPlayer INTEGER DEFAULT 0,
+    nbMove INTEGER DEFAULT 0,
+    nbRound INTEGER DEFAULT 2,
+    duration INTEGER DEFAULT 0,
+	createdAt INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS Player (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pseudo TEXT,
+    nbMove INTEGER DEFAULT 0,
+	nbVictory INTEGER DEFAULT 0,
+    createdAt INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS GameParticipation (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+    idGame INTEGER NOT NULL,
+    idPlayer INTEGER NOT NULL,
+    nbMove INTEGER DEFAULT 0,
+    createdAt INTEGER,
+    
+	FOREIGN KEY (idGame) REFERENCES Game(id),
+    FOREIGN KEY (idPlayer) REFERENCES Player(id)
+);
+
+CREATE TABLE IF NOT EXISTS GameMove (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+    idParticipation INTEGER NOT NULL,
+    color TEXT NOT NULL,
+    value INTEGER NOT NULL, 
+    rowPosition INTEGER NOT NULL,
+    colPosition INTEGER NOT NULL,
+    createdAt INTEGER,
+    
+    FOREIGN KEY (idParticipation) REFERENCES GameParticipation(id)
+);

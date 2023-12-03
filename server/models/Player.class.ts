@@ -1,6 +1,6 @@
 import { ResultSetHeader } from "mysql2";
-import db from "../config/db";
 import { getTimestamp } from "../../src/lib//utils";
+import { MySQLConnection, SQLiteConnection } from "../config/db";
 
 /**
  * Classe représentant un joueur
@@ -45,7 +45,10 @@ export default class Player {
    * @param rows Données récupérées de la base de donnée
    */
   public static rowToObject(rows) {
-    return rows.map((row) => new Player(row));
+    if (rows) {
+      return rows.map((row) => new Player(row));
+    }
+    return [];
   }
 
   /**
@@ -66,12 +69,28 @@ export default class Player {
    * Sauvegarde le joueur dans la base de donnée
    */
   public async save() {
+    let result;
+    const { id, ...rest } = this;
     try {
-      const [result] = await db.query(
-        `INSERT INTO ${Player.tableName} SET ?`,
-        this
-      );
-      this.id = (result as ResultSetHeader).insertId;
+      switch (global.databaseType) {
+        case "mysql":
+          [result] = await MySQLConnection.query(
+            `INSERT INTO ${Player.tableName} SET ?`,
+            this
+          );
+          this.id = (result as ResultSetHeader).insertId;
+          break;
+        case "sqlite":
+          result = SQLiteConnection.prepare(
+            `INSERT INTO ${Player.tableName}(pseudo, nbMove, nbVictory, createdAt) VALUES (?, ?, ?, ?)`
+          ).run(Object.values(rest));
+          this.id = result.lastInsertRowid;
+          break;
+
+        case "mongodb":
+          // result = await db.collection(Player.tableName).insertOne(this);
+          break;
+      }
       return true;
     } catch (err) {
       console.error(err);
@@ -85,10 +104,22 @@ export default class Player {
    */
   public async update() {
     try {
-      await db.query(`UPDATE ${Player.tableName} SET ? WHERE id = ?`, [
-        this,
-        this.id,
-      ]);
+      switch (global.databaseType) {
+        case "mysql":
+          await MySQLConnection.query(
+            `UPDATE ${Player.tableName} SET ? WHERE id = ?`,
+            [this, this.id]
+          );
+          break;
+        case "sqlite":
+          SQLiteConnection.prepare(
+            `UPDATE ${Player.tableName} SET pseudo = ?, nbMove = ?, nbVictory = ?, createdAt = ? WHERE id = ?`
+          ).run(this, this.id);
+          break;
+        case "mongodb":
+          // await db.collection(Player.tableName).updateOne({ id: this.id }, { $set: this });
+          break;
+      }
       return true;
     } catch (err) {
       console.error(err);
@@ -102,11 +133,24 @@ export default class Player {
    * @returns Joueur trouvé
    */
   public static async find(id: number): Promise<Player | null> {
+    let rows;
     try {
-      const [rows] = await db.query(
-        `SELECT * FROM ${this.tableName} WHERE id = ?`,
-        [id]
-      );
+      switch (global.databaseType) {
+        case "mysql":
+          [rows] = await MySQLConnection.query(
+            `SELECT * FROM ${this.tableName} WHERE id = ?`,
+            [id]
+          );
+          break;
+        case "sqlite":
+          rows = SQLiteConnection.prepare(
+            `SELECT * FROM ${this.tableName} WHERE id = ?`
+          ).all(id);
+          break;
+        case "mongodb":
+          // rows = await db.collection(this.tableName).findOne({ id });
+          break;
+      }
       return this.rowToObject(rows)[0];
     } catch (err) {
       console.error(err);

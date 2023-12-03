@@ -62,7 +62,10 @@ export const columns: ColumnDef<Game>[] = [
     cell: ({ row }) => {
       // On convertit le timestamp en date
       const date = fromUnixTime(row.getValue("createdAt"));
-      return format(date, "dd/MM/yyyy");
+      if (date instanceof Date && !isNaN(date.valueOf())) {
+        return format(date, "dd/MM/yyyy");
+      }
+      return "Erreur";
     },
   },
 ];

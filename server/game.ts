@@ -13,12 +13,14 @@ export const router = express.Router();
  * Récupérer toutes les parties
  */
 router.get("/", async (req, res) => {
+  global.databaseType = req.query.db || "mysql"; 
   const games = await Game.findAll();
   res.send(await Promise.all(games.map((game) => game.toClient())));
 });
 
 router.get("/find/:id", async (req, res) => {
   const { id } = req.params;
+  global.databaseType = req.query.db || "mysql"; 
   const game = await Game.find(Number(id));
   if (!game) {
     return res.status(404).send({ message: "Partie non trouvée" });
@@ -27,7 +29,8 @@ router.get("/find/:id", async (req, res) => {
 });
 
 router.post("/", async ({ body }, res) => {
-  const { players, nbRound, createdAt } = body;
+  const { players, nbRound, database, createdAt } = body;
+  global.databaseType = database || "mysql"; 
   const game = new Game({ nbRound, createdAt });
   const success = await game.save();
   if (!success) {
@@ -62,7 +65,8 @@ router.post("/", async ({ body }, res) => {
 });
 
 router.put("/", async ({ body }, res) => {
-  const { players, winner, ...rest } = body;
+  const { players, winner, database, ...rest } = body;
+  global.databaseType = database || "mysql"; 
   const game = new Game({ idWinner: winner?.id ?? null, ...rest });
   const success = await game.update();
   if (!success) {
@@ -80,13 +84,6 @@ router.put("/", async ({ body }, res) => {
         .status(500)
         .send({ message: "Erreur lors de la sauvegarde du joueur" });
     }
-    //   const participations = GameParticipation.findFromGame(game.id);
-    //   success = await participation.save();
-    //   if (!success) {
-    //     return res
-    //       .status(500)
-    //       .send({ message: "Erreur lors de la sauvegarde de la participation" });
-    //   }
   }
 
   return res.send(true);
@@ -96,7 +93,8 @@ router.put("/", async ({ body }, res) => {
  * Générer des parties aléatoires
  */
 router.post("/generate", async ({ body }, res) => {
-  const { nbGame, nbPlayer } = body;
+  const { nbGame, nbPlayer, database } = body;
+  global.databaseType = database || "mysql"; 
   let success = true;
   const newPlayerIds: number[] = [];
   const participations: number[] = [];

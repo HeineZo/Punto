@@ -1,7 +1,7 @@
 import { ResultSetHeader } from "mysql2";
 import { getTimestamp } from "../../src/lib//utils";
-import db from "../config/db";
 import { Colors, Range } from "./type";
+import { MySQLConnection, SQLiteConnection } from "../config/db";
 
 /**
  * Carte posée par un joueur dans une partie
@@ -59,11 +59,24 @@ export default class GameMove {
    * Sauvegarde le coup joué dans la base de donnée
    */
   public async save() {
+    let result;
+    const { id, ...rest } = this;
     try {
-      const [result] = await db.query(
-        `INSERT INTO ${GameMove.tableName} SET ?`,
-        this
-      );
+      switch (global.databaseType) {
+        case "mysql":
+          [result] = await MySQLConnection.query(
+            `INSERT INTO ${GameMove.tableName} SET ?`,
+            this
+          );
+          break;
+        case "sqlite":
+          result = SQLiteConnection.prepare(
+            `INSERT INTO ${GameMove.tableName}(idParticipation, color, value, rowPosition, colPosition, createdAt) VALUES (?, ?, ?, ?, ?, ?)`
+          ).run(Object.values(rest));
+          break;
+        case "mongodb":
+          break;
+      }
       this.id = (result as ResultSetHeader).insertId;
       return true;
     } catch (err) {
