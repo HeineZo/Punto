@@ -72,11 +72,11 @@ Enfin, rendez vous à l'adresse suivante: https://localhost:3001
 </p>
 
 ## 👋 Me contacter
-<div>
+<a href="https://discord.com/invite/enzolefrigo">
    <img src="https://skillicons.dev/icons?i=discord" width="50" alt="Me contact" />
-   
+
    @enzolefrigo
-</div>
+</a>
 
 ## 🤠 Crédits
 
