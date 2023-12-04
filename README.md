@@ -34,7 +34,9 @@
 
 ### Code
 
-Pour clôner le projet et lancer l'application, vous aurez besoin d'installer [Git](https://git-scm.com) et [Node.js](https://nodejs.org/en/download/) (qui installe [npm](http://npmjs.com)). Depuis votre terminal:
+Pour clôner le projet et lancer l'application, vous aurez besoin d'installer [Git](https://git-scm.com) et [Node.js](https://nodejs.org/en/download/) (qui installe [npm](http://npmjs.com)). 
+
+**Installer l'application**
 
 ```bash
 # Clôner le projet
@@ -45,14 +47,22 @@ $ cd Punto
 
 # Installer les dépendances
 $ npm install
+```
 
+**Remplir les données de connexion**
+
+Créez un fichier `.env` et copiez-y le contenu du fichier `.env.local`. Remplissez les informations correspondantes dans le fichier `.env`
+
+**Lancez l'application**
+
+```bash
 # Lancer le client
 $ npm run client
 
 # Lancer le serveur (dans un autre terminal)
 $ npm run server
 ```
-Enfin, rendez vous à l'adresse suivante: (https://localhost:3001)[https://localhost:3001]
+Enfin, rendez vous à l'adresse suivante: https://localhost:3001
 
 
 ## 🕹️ Outils utilisés
@@ -62,18 +72,20 @@ Enfin, rendez vous à l'adresse suivante: (https://localhost:3001)[https://local
 </p>
 
 ## 👋 Me contacter
-<p style="display: flex; flex-direction: column; align-items: center; width: fit-content; gap: 5px">
+<div>
    <img src="https://skillicons.dev/icons?i=discord" width="50" alt="Me contact" />
+   
    @enzolefrigo
-</p>
+</div>
 
 ## 🤠 Crédits
 
 <table>
     <tr>
         <td align="center">
-            <a href="https://github.com/HeineZo" style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="https://github.com/HeineZo">
                 <img src="https://avatars.githubusercontent.com/u/85509892?v=4" width="100px;" alt="Image de profil" style="border-radius: 100%"/>
+                <br />
                 <sub><b>Enzo</b></sub>
             </a>
             <br />

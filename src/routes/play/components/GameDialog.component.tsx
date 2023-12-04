@@ -63,7 +63,7 @@ export function GameDialog() {
           onClick: handleReplay,
         },
       });
-    } else if (winner) {
+    } else if (winner && game.rounds.length < game.nbRound) {
       setDialog({
         title: `${winner?.pseudo} remporte la manche 🥳`,
         cancelBtn: {
@@ -75,6 +75,22 @@ export function GameDialog() {
         confirmBtn: {
           text: "Manche suivante",
           onClick: handleNextRound,
+        },
+      });
+    } else if (winner) {
+      setDialog({
+        title: `Egalité`,
+        description: `Aucun joueur n'a remporté la manche`,
+        cancelBtn: {
+          text: "Revenir à l'écran d'accueil",
+          onClick: () => {
+            handleEndGame();
+            navigate("/");
+          },
+        },
+        confirmBtn: {
+          text: "Rejouer",
+          onClick: handleReplay,
         },
       });
     }

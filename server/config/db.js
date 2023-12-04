@@ -31,7 +31,7 @@ export const MySQLConnection = await createConnection({
   database: process.env.DB_NAME,
 });
 export const SQLiteConnection = new Database("punto.db");
-export const MongoConnection = await mongoose.connect(process.env.MONGO_URL);
+// export const MongoConnection = await mongoose.connect(process.env.MONGO_URL);
 
 
 // Création des tables si elles n'existent pas
@@ -67,23 +67,23 @@ try {
   console.error("Erreur lors de la création des tables SQLite", error);
 }
 
-const Schema = mongoose.Schema;
-const Player = new Schema({
-  pseudo: String,
-  nbMove: Number,
-  nbVictory: Number,
-})
+// const Schema = mongoose.Schema;
+// const Player = new Schema({
+//   pseudo: String,
+//   nbMove: Number,
+//   nbVictory: Number,
+// })
 
-const Game = new Schema({
-  winner: Player,
-  nbPlayer: Number,
-  players: [Player],
-  nbMove: Number,
-  moves: [],
-  duration: Number,
-  nbRound: Number,
-  date: Date
-});
+// const Game = new Schema({
+//   winner: Player,
+//   nbPlayer: Number,
+//   players: [Player],
+//   nbMove: Number,
+//   moves: [],
+//   duration: Number,
+//   nbRound: Number,
+//   date: Date
+// });
 
-export const MongoPlayer = mongoose.model('Player', Player);
-export const MongoGame = mongoose.model('Game', Game);
+// export const MongoPlayer = mongoose.model('Player', Player);
+// export const MongoGame = mongoose.model('Game', Game);
