@@ -150,11 +150,12 @@ export default function Generate() {
                       <DatabaseZap className="h-5 w-5" />
                     </TabsTrigger>
                   </Help>
-                  <Help text="MongoDB">
+                  {/* TODO: à implémenter
+                   <Help text="MongoDB">
                     <TabsTrigger value="mongodb">
                       <Leaf className="h-5 w-5" />
                     </TabsTrigger>
-                  </Help>
+                  </Help> */}
                 </TabsList>
               </Tabs>
             </div>

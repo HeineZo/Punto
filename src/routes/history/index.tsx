@@ -41,7 +41,7 @@ export default function History() {
           <TabsList>
             <TabsTrigger value="mysql">MySQL</TabsTrigger>
             <TabsTrigger value="sqlite">SQLite</TabsTrigger>
-            <TabsTrigger value="mongodb">MongoDB</TabsTrigger>
+            {/* <TabsTrigger value="mongodb">MongoDB</TabsTrigger> TODO: à implémenter*/}
           </TabsList>
         </Tabs>
         <DataTable

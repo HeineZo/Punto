@@ -195,11 +195,12 @@ export default function CreateGame() {
                   <DatabaseZap className="h-5 w-5" />
                 </TabsTrigger>
               </Help>
+              {/* TODO: à implémenter
               <Help text="MongoDB">
                 <TabsTrigger value="mongodb">
                   <Leaf className="h-5 w-5" />
                 </TabsTrigger>
-              </Help>
+              </Help> */}
             </TabsList>
           </Tabs>
         </div>

@@ -20,7 +20,7 @@ export default function PlayGame() {
       return;
     }
 
-    const nbCardToWin = game.nbPlayer === 2 ? 4 : 5;
+    const nbCardToWin = game.nbPlayer === 2 ? 5 : 4;
     if (checkWin(grid, nbCardToWin)) {
       game.endRound();
       setGame(new Game(game));

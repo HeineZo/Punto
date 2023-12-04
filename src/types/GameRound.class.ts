@@ -110,7 +110,6 @@ export class GameRound {
     );
     const nextIndex = (currentIndex + 1) % this.players.length;
     const nextPlayer = this.players[nextIndex];
-    console.log(this.players);
     this.moves?.push(new GameMove({ participation: nextPlayer }));
   }
 
