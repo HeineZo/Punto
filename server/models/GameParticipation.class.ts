@@ -2,7 +2,11 @@ import { ResultSetHeader } from "mysql2";
 import Game from "./Game.class";
 import Player from "./Player.class";
 import { getTimestamp } from "../../src/lib//utils";
-import { MySQLConnection, SQLiteConnection } from "../config/db";
+import {
+  MySQLConnection,
+  Neo4JConnection,
+  SQLiteConnection,
+} from "../config/db";
 
 /**
  * Classe représentant une participation d'un joueur dans une partie
@@ -91,8 +95,19 @@ export default class GameParticipation {
           this.id = result.lastInsertRowid;
           break;
         case "mongodb":
-        // return await this.saveMongoDB();
-        break;
+          // return await this.saveMongoDB();
+          break;
+        case "neo4j":
+          result = await Neo4JConnection.run(
+            `MATCH (p:Player), (g:Game) WHERE p.id = $idPlayer AND g.id = $idGame CREATE (p)-[participation:HAS_PLAYED]->(g) 
+            RETURN id(participation) as participationId`,
+            {
+              idPlayer: this.idPlayer,
+              idGame: this.idGame,
+            }
+          );
+          this.id = result.records[0].get("participationId");
+          break;
       }
       return true;
     } catch (err) {

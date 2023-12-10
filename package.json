@@ -37,6 +37,7 @@
     "match-sorter": "^6.3.1",
     "mongoose": "^8.0.2",
     "mysql2": "^3.6.3",
+    "neo4j-driver": "^5.15.0",
     "pluralize-fr": "^1.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

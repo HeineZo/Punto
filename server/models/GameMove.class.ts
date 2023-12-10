@@ -76,6 +76,18 @@ export default class GameMove {
           break;
         case "mongodb":
           break;
+        case "neo4j":
+          result = await Neo4JConnection.run(
+            `MATCH (p:Player), (g:Game) WHERE p.id = $idPlayer AND g.id = $idGame CREATE (p)-[participation:HAS_PLAYED]->(g) 
+            RETURN id(participation) as participationId`,
+            
+            {
+              idPlayer: this.idPlayer,
+              idGame: this.idGame,
+            }
+          );
+          this.id = result.records[0].get("participationId");
+          break;
       }
       this.id = (result as ResultSetHeader).insertId;
       return true;

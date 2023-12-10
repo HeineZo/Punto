@@ -3,7 +3,12 @@ import { ResultSetHeader } from "mysql2";
 import GameParticipation from "./GameParticipation.class.js";
 import Player from "./Player.class.js";
 import { getTimestamp } from "../../src/lib//utils.js";
-import { MySQLConnection, SQLiteConnection, MongoGame } from "../config/db.js";
+import {
+  MySQLConnection,
+  SQLiteConnection,
+  MongoGame,
+  Neo4JConnection,
+} from "../config/db.js";
 
 /**
  * Classe représentant une partie
@@ -107,6 +112,14 @@ export default class Game {
           this.id = result.lastInsertRowid;
           break;
         case "mongodb":
+          break;
+        case "neo4j":
+          result = await Neo4JConnection.run(
+            `CREATE (g:Game {nbPlayer: $nbPlayer, nbMove: $nbMove, nbRound: $nbRound, duration: $duration, createdAt: $createdAt}) 
+            RETURN id(g) as gameId`,
+            rest
+          );
+          this.id = result.records[0].get("gameId");
           break;
       }
       return true;

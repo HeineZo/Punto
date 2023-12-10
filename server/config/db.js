@@ -4,7 +4,7 @@ import { createConnection } from "mysql2/promise";
 import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
-import mongoose from 'mongoose';
+import neo4j from "neo4j-driver";
 
 /**
  * Lis un fichier
@@ -24,15 +24,22 @@ export async function readFile(pathdir) {
 /**
  * Crée des connexions aux bases de données
  */
+// MySQL
 export const MySQLConnection = await createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 });
+// SQLite
 export const SQLiteConnection = new Database("punto.db");
+// Neo4J
+const Neo4JDriver = neo4j.driver(
+  process.env.NEO4J_URL,
+  neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD)
+);
+export const Neo4JConnection = Neo4JDriver.session({ database: "Punto" });
 // export const MongoConnection = await mongoose.connect(process.env.MONGO_URL);
-
 
 // Création des tables si elles n'existent pas
 // const mysqlFile = await readFile("./server/config/mysql.sql");
@@ -51,7 +58,6 @@ export const SQLiteConnection = new Database("punto.db");
 /**
  * Crée une connexion à la base de données SQLite
  */
-
 // Création des tables si elles n'existent pas
 const sqliteFile = await readFile("./server/config/sqlite.sql");
 if (!sqliteFile) {
@@ -64,7 +70,17 @@ try {
   await SQLiteConnection.exec(sqliteFile);
   console.log("Tables SQLite créées avec succès");
 } catch (error) {
-  console.error("Erreur lors de la création des tables SQLite", error);
+  console.error("Erreur lors de la création des tables SQLite: ", error);
+}
+
+try {
+  // await Neo4JConnection.run("CREATE DATABASE Punto");
+  console.log("Tables Neo4J créées avec succès");
+} catch (error) {
+  console.error("Erreur lors de la création des tables Neo4J:", error);
+} finally {
+  await Neo4JConnection.close();
+  await Neo4JDriver.close();
 }
 
 // const Schema = mongoose.Schema;
@@ -87,3 +103,5 @@ try {
 
 // export const MongoPlayer = mongoose.model('Player', Player);
 // export const MongoGame = mongoose.model('Game', Game);
+
+await Neo4JDriver.close();

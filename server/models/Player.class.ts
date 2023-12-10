@@ -1,6 +1,6 @@
 import { ResultSetHeader } from "mysql2";
 import { getTimestamp } from "../../src/lib//utils";
-import { MySQLConnection, SQLiteConnection } from "../config/db";
+import { MySQLConnection, Neo4JConnection, SQLiteConnection } from "../config/db";
 
 /**
  * Classe représentant un joueur
@@ -86,9 +86,16 @@ export default class Player {
           ).run(Object.values(rest));
           this.id = result.lastInsertRowid;
           break;
-
         case "mongodb":
           // result = await db.collection(Player.tableName).insertOne(this);
+          break;
+        case "neo4j":
+          result = await Neo4JConnection.run(
+            `CREATE (p:Player {pseudo: $pseudo, nbMove: $nbMove, nbVictory: $nbVictory, createdAt: $createdAt}) 
+              RETURN id(p) as playerId`,
+            rest
+          );
+          this.id = result.records[0].get("playerId");
           break;
       }
       return true;
