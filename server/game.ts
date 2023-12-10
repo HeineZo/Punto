@@ -13,14 +13,14 @@ export const router = express.Router();
  * Récupérer toutes les parties
  */
 router.get("/", async (req, res) => {
-  global.databaseType = req.query.db || "mysql"; 
+  global.databaseType = req.query.db || "mysql";
   const games = await Game.findAll();
   res.send(await Promise.all(games.map((game) => game.toClient())));
 });
 
 router.get("/find/:id", async (req, res) => {
   const { id } = req.params;
-  global.databaseType = req.query.db || "mysql"; 
+  global.databaseType = req.query.db || "mysql";
   const game = await Game.find(Number(id));
   if (!game) {
     return res.status(404).send({ message: "Partie non trouvée" });
@@ -30,7 +30,7 @@ router.get("/find/:id", async (req, res) => {
 
 router.post("/", async ({ body }, res) => {
   const { players, nbRound, database, createdAt } = body;
-  global.databaseType = database || "mysql"; 
+  global.databaseType = database || "mysql";
   const game = new Game({ nbRound, createdAt });
   const success = await game.save();
   if (!success) {
@@ -66,7 +66,7 @@ router.post("/", async ({ body }, res) => {
 
 router.put("/", async ({ body }, res) => {
   const { players, winner, database, ...rest } = body;
-  global.databaseType = database || "mysql"; 
+  global.databaseType = database || "mysql";
   const game = new Game({ idWinner: winner?.id ?? null, ...rest });
   const success = await game.update();
   if (!success) {
@@ -94,14 +94,16 @@ router.put("/", async ({ body }, res) => {
  */
 router.post("/generate", async ({ body }, res) => {
   const { nbGame, nbPlayer, database } = body;
-  global.databaseType = database || "mysql"; 
+  global.databaseType = database || "mysql";
   let success = true;
   const newPlayerIds: number[] = [];
-  const participations: number[] = [];
+  const participations: GameParticipation[] = [];
 
   for (let i = 0; i < nbPlayer; i++) {
     const player = new Player({
       pseudo: `Player ${i}`,
+      nbMove: randomInt(10, 50),
+      nbVictory: randomInt(2, 10),
     });
     success = await player.save();
     if (!success) {
@@ -112,7 +114,6 @@ router.post("/generate", async ({ body }, res) => {
 
     newPlayerIds.push(player.id);
   }
-
   for (let i = 0; i < nbGame; i++) {
     const game = new Game({
       idWinner: randomInt(newPlayerIds[0], newPlayerIds.at(-1) ?? -1),
@@ -143,22 +144,21 @@ router.post("/generate", async ({ body }, res) => {
         });
       }
 
-      participations.push(gameParticipation.id);
+      participations.push(gameParticipation);
     }
 
     for (let i = 0; i < randomInt(0, 100); i++) {
       const colors = enumToArray(Colors);
+      const randomParticipation =
+        participations[randomInt(0, participations.length)];
       const gameMove = new GameMove({
-        idParticipation: randomInt(
-          participations[0],
-          participations.at(-1) ?? -1
-        ),
+        idParticipation: randomParticipation?.id,
         color: colors[Math.floor(Math.random() * colors.length)],
         value: randomInt(1, 9) as Range<1, 9>,
         rowPosition: randomInt(1, 7) as Range<1, 7>,
         colPosition: randomInt(1, 7) as Range<1, 7>,
       });
-      success = await gameMove.save();
+      success = await gameMove.save(randomParticipation);
       if (!success) {
         return res
           .status(500)

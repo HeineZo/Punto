@@ -1,6 +1,11 @@
 import { ResultSetHeader } from "mysql2";
 import { getTimestamp } from "../../src/lib//utils";
-import { MySQLConnection, Neo4JConnection, SQLiteConnection } from "../config/db";
+import {
+  MySQLConnection,
+  Neo4JConnection,
+  Neo4JDriver,
+  SQLiteConnection,
+} from "../config/db";
 
 /**
  * Classe représentant un joueur
@@ -67,6 +72,7 @@ export default class Player {
 
   /**
    * Sauvegarde le joueur dans la base de donnée
+   * @returns True si la sauvegarde a réussie, false sinon
    */
   public async save() {
     let result;
@@ -95,7 +101,7 @@ export default class Player {
               RETURN id(p) as playerId`,
             rest
           );
-          this.id = result.records[0].get("playerId");
+          this.id = result.records[0].get("playerId").low;
           break;
       }
       return true;
@@ -157,6 +163,19 @@ export default class Player {
         case "mongodb":
           // rows = await db.collection(this.tableName).findOne({ id });
           break;
+        case "neo4j":
+          const session = Neo4JDriver.session({ database: "Punto" });
+          const result = await session.run(
+            "MATCH (p:Player) WHERE ID(p) = $id RETURN p, ID(p) as playerId",
+            { id: id ?? -1 }
+          );
+          rows = [
+            {
+              ...result.records[0].get("p").properties,
+              id: result.records[0].get("playerId").low,
+            },
+          ];
+          session.close();
       }
       return this.rowToObject(rows)[0];
     } catch (err) {

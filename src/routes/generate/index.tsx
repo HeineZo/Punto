@@ -26,6 +26,7 @@ import {
   DatabaseZap,
   Leaf,
   Loader2 as Loader,
+  Waypoints,
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
@@ -55,7 +56,7 @@ export default function Generate() {
     const [success, data] = await Game.generate(
       formData.nbGame,
       formData.nbPlayer,
-      formData.database as "mysql" | "sqlite" | "mongodb"
+      formData.database as "mysql" | "sqlite" | "mongodb" | "neo4j"
     );
 
     if (success) {
@@ -148,6 +149,11 @@ export default function Generate() {
                   <Help text="SQLite">
                     <TabsTrigger value="sqlite">
                       <DatabaseZap className="h-5 w-5" />
+                    </TabsTrigger>
+                  </Help>
+                  <Help text="Neo4J">
+                    <TabsTrigger value="neo4j">
+                      <Waypoints className="h-5 w-5" />
                     </TabsTrigger>
                   </Help>
                   {/* TODO: à implémenter

@@ -34,10 +34,17 @@ export const MySQLConnection = await createConnection({
 // SQLite
 export const SQLiteConnection = new Database("punto.db");
 // Neo4J
-const Neo4JDriver = neo4j.driver(
+export const Neo4JDriver = neo4j.driver(
   process.env.NEO4J_URL,
   neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD)
 );
+
+try {
+  await Neo4JDriver.executeQuery("CREATE DATABASE Punto IF NOT EXISTS");
+  console.log("Base de donnée Neo4J créée avec succès");
+} catch (error) {
+  console.error("Erreur lors de la création de la base de donnée Neo4J:", error);
+}
 export const Neo4JConnection = Neo4JDriver.session({ database: "Punto" });
 // export const MongoConnection = await mongoose.connect(process.env.MONGO_URL);
 
@@ -73,16 +80,6 @@ try {
   console.error("Erreur lors de la création des tables SQLite: ", error);
 }
 
-try {
-  // await Neo4JConnection.run("CREATE DATABASE Punto");
-  console.log("Tables Neo4J créées avec succès");
-} catch (error) {
-  console.error("Erreur lors de la création des tables Neo4J:", error);
-} finally {
-  await Neo4JConnection.close();
-  await Neo4JDriver.close();
-}
-
 // const Schema = mongoose.Schema;
 // const Player = new Schema({
 //   pseudo: String,
@@ -103,5 +100,3 @@ try {
 
 // export const MongoPlayer = mongoose.model('Player', Player);
 // export const MongoGame = mongoose.model('Game', Game);
-
-await Neo4JDriver.close();

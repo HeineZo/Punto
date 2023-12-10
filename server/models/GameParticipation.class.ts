@@ -99,49 +99,18 @@ export default class GameParticipation {
           break;
         case "neo4j":
           result = await Neo4JConnection.run(
-            `MATCH (p:Player), (g:Game) WHERE p.id = $idPlayer AND g.id = $idGame CREATE (p)-[participation:HAS_PLAYED]->(g) 
-            RETURN id(participation) as participationId`,
+            `MATCH (p:Player), (g:Game) WHERE p.id = $idPlayer AND g.id = $idGame CREATE (p)-[participation:PARTICIPATES_IN]->(g)`,
             {
               idPlayer: this.idPlayer,
               idGame: this.idGame,
             }
           );
-          this.id = result.records[0].get("participationId");
           break;
       }
       return true;
     } catch (err) {
       console.error(err);
       return false;
-    }
-  }
-
-  /**
-   * Récupère le nombre de joueurs dans une partie
-   * @param id Identifiant de la partie
-   * @returns Nombre de joueurs ayant participé à la partie
-   */
-  public static async getNbParticipation(id: number) {
-    let rows;
-    try {
-      switch (global.databaseType) {
-        case "mysql":
-          [rows] = await MySQLConnection.query(
-            `SELECT COUNT(*) as nbParticipation FROM ${this.tableName} WHERE idGame = ?`,
-            [id]
-          );
-          return rows[0].nbParticipation;
-        case "sqlite":
-          rows = SQLiteConnection.prepare(
-            `SELECT COUNT(*) as nbParticipation FROM ${this.tableName} WHERE idGame = ?`
-          ).get(id);
-          return rows.nbParticipation;
-        case "mongodb":
-        // return await this.findAllMongoDB();
-      }
-    } catch (err) {
-      console.error(err);
-      return 0;
     }
   }
 

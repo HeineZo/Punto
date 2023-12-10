@@ -1,7 +1,12 @@
 import { Game } from "@/types/Game.class";
 import { Player } from "@/types/Player.class";
 import { ColumnDef } from "@tanstack/react-table";
-import { intervalToDuration, formatDuration, format, fromUnixTime } from "date-fns";
+import {
+  intervalToDuration,
+  formatDuration,
+  format,
+  fromUnixTime,
+} from "date-fns";
 
 export const columns: ColumnDef<Game>[] = [
   {

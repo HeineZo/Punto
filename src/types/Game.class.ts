@@ -238,7 +238,7 @@ export class Game {
   public static async generate(
     nbGame: number,
     nbPlayer: number,
-    database: "mysql" | "sqlite" | "mongodb"
+    database: "mysql" | "sqlite" | "mongodb" | "neo4j"
   ): Promise<[boolean, { message: string }]> {
     const res = await fetch("http://localhost:3002/game/generate", {
       method: "POST",

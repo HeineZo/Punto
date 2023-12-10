@@ -1,14 +1,12 @@
-/* eslint-disable no-case-declarations */
 import { ResultSetHeader } from "mysql2";
-import GameParticipation from "./GameParticipation.class.js";
-import Player from "./Player.class.js";
 import { getTimestamp } from "../../src/lib//utils.js";
 import {
   MySQLConnection,
-  SQLiteConnection,
-  MongoGame,
   Neo4JConnection,
+  SQLiteConnection
 } from "../config/db.js";
+import GameParticipation from "./GameParticipation.class.js";
+import Player from "./Player.class.js";
 
 /**
  * Classe représentant une partie
@@ -75,7 +73,6 @@ export default class Game {
    */
   public async toClient() {
     const winner = await Player.find(this.idWinner);
-    const nbPlayer = await GameParticipation.getNbParticipation(this.id);
     const players = await GameParticipation.getPlayers(this.id);
     return {
       id: this.id,
@@ -83,7 +80,7 @@ export default class Game {
       nbMove: this.nbMove,
       nbRound: this.nbRound,
       duration: this.duration,
-      nbPlayer,
+      nbPlayer: this.nbPlayer,
       players,
       createdAt: this.createdAt,
     };
@@ -115,11 +112,11 @@ export default class Game {
           break;
         case "neo4j":
           result = await Neo4JConnection.run(
-            `CREATE (g:Game {nbPlayer: $nbPlayer, nbMove: $nbMove, nbRound: $nbRound, duration: $duration, createdAt: $createdAt}) 
+            `CREATE (g:Game {nbPlayer: $nbPlayer, nbMove: $nbMove, nbRound: $nbRound, duration: $duration, createdAt: $createdAt, idWinner: $idWinner}) 
             RETURN id(g) as gameId`,
             rest
           );
-          this.id = result.records[0].get("gameId");
+          this.id = result.records[0].get("gameId").low;
           break;
       }
       return true;
@@ -177,6 +174,16 @@ export default class Game {
           break;
         case "mongodb":
           break;
+        case "neo4j":
+          const result = await Neo4JConnection.run(
+            `MATCH (g:Game) RETURN g, id(g) as gameId`
+          );
+          rows = result.records.map((record) => {
+            return {
+              ...record.get("g").properties,
+              id: record.get("gameId").low,
+            };
+          });
       }
       return this.rowToObject(rows);
     } catch (err) {

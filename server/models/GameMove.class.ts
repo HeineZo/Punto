@@ -1,7 +1,8 @@
 import { ResultSetHeader } from "mysql2";
 import { getTimestamp } from "../../src/lib//utils";
 import { Colors, Range } from "./type";
-import { MySQLConnection, SQLiteConnection } from "../config/db";
+import { MySQLConnection, Neo4JConnection, SQLiteConnection } from "../config/db";
+import GameParticipation from "./GameParticipation.class";
 
 /**
  * Carte posée par un joueur dans une partie
@@ -58,7 +59,7 @@ export default class GameMove {
   /**
    * Sauvegarde le coup joué dans la base de donnée
    */
-  public async save() {
+  public async save(participation?: GameParticipation) {
     let result;
     const { id, ...rest } = this;
     try {
@@ -78,15 +79,18 @@ export default class GameMove {
           break;
         case "neo4j":
           result = await Neo4JConnection.run(
-            `MATCH (p:Player), (g:Game) WHERE p.id = $idPlayer AND g.id = $idGame CREATE (p)-[participation:HAS_PLAYED]->(g) 
-            RETURN id(participation) as participationId`,
-            
+            `MATCH (p:Player {id: $playerId})-[participation:PARTICIPATES_IN]->(g:Game {id: $gameId})
+            CREATE (c:Card {color: $color, value: $value})
+            CREATE (p)-[move:PLAYS {rowPosition: $row, colPosition: $col}]->(c)`,
             {
-              idPlayer: this.idPlayer,
-              idGame: this.idGame,
+              playerId: participation?.idPlayer,
+              gameId: participation?.idGame,
+              color: this.color,
+              value: this.value,
+              row: this.rowPosition,
+              col: this.colPosition
             }
           );
-          this.id = result.records[0].get("participationId");
           break;
       }
       this.id = (result as ResultSetHeader).insertId;
