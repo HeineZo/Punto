@@ -33,17 +33,28 @@ export const MySQLConnection = await createConnection({
 });
 // SQLite
 export const SQLiteConnection = new Database("punto.db");
+export let Neo4JDriver;
 // Neo4J
-export const Neo4JDriver = neo4j.driver(
-  process.env.NEO4J_URL,
-  neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD)
-);
+try {
+  Neo4JDriver = neo4j.driver(
+    process.env.NEO4J_URL,
+    neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD)
+  );
+} catch (error) {
+  console.error(
+    "Erreur lors de la connexion à la base de donnée Neo4J:",
+    error
+  );
+}
 
 try {
   await Neo4JDriver.executeQuery("CREATE DATABASE Punto IF NOT EXISTS");
   console.log("Base de donnée Neo4J créée avec succès");
 } catch (error) {
-  console.error("Erreur lors de la création de la base de donnée Neo4J:", error);
+  console.error(
+    "Erreur lors de la création de la base de donnée Neo4J:",
+    error
+  );
 }
 export const Neo4JConnection = Neo4JDriver.session({ database: "Punto" });
 // export const MongoConnection = await mongoose.connect(process.env.MONGO_URL);
