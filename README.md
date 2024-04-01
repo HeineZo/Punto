@@ -18,7 +18,7 @@
   <a href="#©-licence">Licence</a> •
 </p>
 
-![Screenshot du site](/public/README/exemple.png)
+![Screenshot de l'application](/public/README/punto.png)
 
 > **NOTE:** Ce projet est réalisé dans le cadre d'un projet à l'IUT de Vannes.
 
